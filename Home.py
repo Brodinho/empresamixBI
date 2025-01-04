@@ -14,17 +14,12 @@ from config.settings import APP_NAME, MODULES
 from shared.components.cards import create_module_card, create_info_card, create_nav_button, create_module_container
 from setup_pages import setup_module_pages
 
-# Área de debug
-debug_info = st.empty()
-
 # Carrega os estilos personalizados
 with open('assets/styles/custom.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-# Debug da configuração dos módulos
-debug_info.info("Setup de páginas iniciado...")
+# Setup silencioso das páginas
 setup_module_pages()
-debug_info.info("Setup de páginas concluído")
 
 def main():
     # Verificar autenticação
@@ -37,18 +32,27 @@ def main():
                 #MainMenu {visibility: hidden;}
                 footer {visibility: hidden;}
                 header {visibility: hidden;}
-                .css-1544g2n {display: none !important;}
-                .css-14xtw13 e8zbici0 {display: none !important;}
-                section[data-testid="stSidebar"] {display: none !important;}
+                
+                /* Esconde completamente o sidebar */
+                [data-testid="stSidebar"] {
+                    display: none !important;
+                }
+                
+                /* Remove o botão de expandir sidebar */
+                .css-1544g2n {
+                    display: none !important;
+                }
+                
+                /* Remove outros elementos do Streamlit */
+                .e8zbici0 {
+                    display: none !important;
+                }
             </style>
         """, unsafe_allow_html=True)
 
         # Cabeçalho
         st.title(APP_NAME)
         st.markdown("---")
-
-        # Debug dos módulos disponíveis
-        debug_info.info(f"Módulos carregados: {list(MODULES.keys())}")
 
         # Criar grid de cards informativos
         st.markdown("### 📊 Módulos Disponíveis")
