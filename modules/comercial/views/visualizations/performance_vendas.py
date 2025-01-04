@@ -1,47 +1,23 @@
 import streamlit as st
 import plotly.express as px
-import pandas as pd
 from modules.comercial.services.data_service import get_sales_data
-from shared.utils.formatters import format_currency, format_percentage
 
 def render():
+    """Renderiza o dashboard de performance de vendas."""
     st.title("Performance de Vendas")
     
-    # Carregando dados
-    try:
-        df = get_sales_data()
-        
-        # Layout em colunas para KPIs
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            st.metric(
-                "Receita Total",
-                format_currency(df['receita'].sum()),
-                format_percentage(df['crescimento_mom'])
-            )
-            
-        with col2:
-            st.metric(
-                "Ticket Médio",
-                format_currency(df['ticket_medio'].mean()),
-                format_percentage(df['variacao_ticket'])
-            )
-            
-        # Gráficos
-        st.subheader("Distribuição Regional de Faturamento")
-        fig_map = px.scatter_mapbox(
-            df,
-            lat='latitude',
-            lon='longitude',
-            size='receita',
-            color='regiao',
-            hover_name='cidade',
-            zoom=4
-        )
-        st.plotly_chart(fig_map, use_container_width=True)
-        
-        # Mais gráficos...
-        
-    except Exception as e:
-        st.error(f"Erro ao carregar dados: {str(e)}") 
+    # Carrega dados
+    df = get_sales_data()
+    
+    # Métricas principais
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Vendas Totais", f"R$ {df['revenue'].sum():,.2f}")
+    with col2:
+        st.metric("Média Diária", f"R$ {df['revenue'].mean():,.2f}")
+    with col3:
+        st.metric("Total de Clientes", f"{df['customers'].sum():,}")
+    
+    # Gráfico de vendas ao longo do tempo
+    fig = px.line(df, x='date', y='revenue', title='Receita ao Longo do Tempo')
+    st.plotly_chart(fig, use_container_width=True) 
