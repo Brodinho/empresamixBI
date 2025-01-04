@@ -3,14 +3,14 @@ from core.auth.login import setup_login
 from config.settings import APP_NAME, MODULES
 from shared.components.cards import create_module_card
 
-def main():
-    # Configuração inicial da página
-    st.set_page_config(
-        page_title=APP_NAME,
-        layout="wide",
-        initial_sidebar_state="collapsed"
-    )
+# Configuração deve ser a primeira chamada do Streamlit
+st.set_page_config(
+    page_title="Empresamix BI",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
+def main():
     # Verificar autenticação
     authenticated, username = setup_login()
     

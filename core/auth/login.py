@@ -4,13 +4,6 @@ import yaml
 from yaml.loader import SafeLoader
 
 def setup_login():
-    # Configuração inicial
-    st.set_page_config(
-        page_title="Empresamix Sistemas - Login",
-        layout="centered",
-        initial_sidebar_state="collapsed"
-    )
-
     # Estilo personalizado
     st.markdown("""
         <style>
