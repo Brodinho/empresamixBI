@@ -2,6 +2,7 @@ import streamlit as st
 from core.auth.login import setup_login
 from config.settings import APP_NAME, MODULES
 from shared.components.cards import create_module_card
+from setup_pages import setup_module_pages
 
 # Configuração da página
 st.set_page_config(
@@ -13,6 +14,9 @@ st.set_page_config(
 # Carrega os estilos personalizados
 with open('assets/styles/custom.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
+# Configura os links dos módulos
+setup_module_pages()
 
 def main():
     # Verificar autenticação
