@@ -1,0 +1,24 @@
+users:
+  admin:
+    role: admin
+    modules:
+      comercial: admin
+      cliente: admin
+      financeiro: admin
+      rh: admin
+      operacional: admin
+      pcp: admin
+      marketing: admin
+  
+  manager:
+    role: manager
+    modules:
+      comercial: write
+      cliente: write
+      financeiro: read
+  
+  user:
+    role: user
+    modules:
+      comercial: read
+      cliente: read 
