@@ -1,0 +1,66 @@
+/* Estilo global */
+.stApp {
+    background-color: #0A192F;
+}
+
+/* Estilo para cards */
+.card {
+    background-color: #172A45;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Estilo para métricas */
+.metric-container {
+    background-color: #1E3A8A;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+}
+
+/* Estilo para gráficos */
+.plot-container {
+    background-color: #172A45;
+    border-radius: 10px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+/* Estilo para sidebar */
+.css-1d391kg {
+    background-color: #172A45;
+}
+
+/* Estilo para botões */
+.stButton>button {
+    background-color: #1E88E5;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.2s;
+}
+
+.stButton>button:hover {
+    background-color: #1565C0;
+}
+
+/* Estilo para inputs */
+.stTextInput>div>div>input {
+    background-color: #1E3A8A;
+    color: white;
+    border: 1px solid #2D3748;
+}
+
+/* Estilo para selectbox */
+.stSelectbox>div>div>select {
+    background-color: #1E3A8A;
+    color: white;
+}

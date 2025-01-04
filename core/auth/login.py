@@ -1,62 +1,97 @@
 import streamlit as st
 import streamlit_authenticator as stauth
-import yaml
-from yaml.loader import SafeLoader
 
 def setup_login():
-    # Estilo personalizado
+    # Estilo com foco no container e centralização
     st.markdown("""
         <style>
+        /* Fundo principal */
         .stApp {
-            background-color: #f0f2f6;
+            background-color: #0A192F !important;
         }
-        .login-container {
-            max-width: 400px;
-            margin: auto;
-            padding: 2rem;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        
+        /* Container principal */
+        .block-container {
+            max-width: 500px !important;
+            padding-top: 2rem !important;
+        }
+        
+        /* Inputs */
+        .stTextInput > div > div > input {
+            background-color: #1E3A8A !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 4px !important;
+            padding: 8px 12px !important;
+            height: 40px !important;
+            font-size: 14px !important;
+        }
+        
+        /* Botão */
+        .stButton > button {
+            background-color: #1E88E5 !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 4px !important;
+            padding: 8px 16px !important;
+            width: 100% !important;
+            margin-top: 1rem !important;
+        }
+        
+        /* Títulos */
+        h1 {
+            font-size: 24px !important;
+            font-weight: bold !important;
+            text-align: center !important;
+            margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
+        }
+        
+        /* Subtítulo */
+        .subtitle {
+            font-size: 14px !important;
+            color: #A8B2D1 !important;
+            text-align: center !important;
+            margin-bottom: 2rem !important;
+        }
+        
+        /* Mensagem de aviso */
+        .stAlert {
+            background-color: rgba(47, 69, 92, 0.7) !important;
+            color: white !important;
+        }
+        
+        /* Remove elementos desnecessários */
+        #MainMenu, footer {
+            visibility: hidden !important;
+        }
+        
+        /* Ajusta espaçamento dos labels */
+        .stTextInput > label {
+            font-size: 14px !important;
+            margin-bottom: 4px !important;
         }
         </style>
     """, unsafe_allow_html=True)
 
-    # Container de login
-    with st.container():
-        st.markdown('<div class="login-container">', unsafe_allow_html=True)
-        
-        # Logo (opcional)
-        # st.image("assets/images/logo.png", width=200)
-        
-        st.title("Empresamix Sistemas")
-        st.subheader("Análise de Dados (BI)")
-
-        # Credenciais temporárias
-        credentials = {
-            'usernames': {
-                'admin': {
-                    'name': 'Admin',
-                    'password': stauth.Hasher(['admin']).generate()[0]
-                }
-            }
-        }
-
-        authenticator = stauth.Authenticate(
-            credentials,
-            'empresamix_cookie',
-            'auth_key',
-            cookie_expiry_days=30
-        )
-
-        name, authentication_status, username = authenticator.login('Login', 'main')
-
-        if authentication_status == False:
-            st.error('Usuário e/ou Senha incorretos')
-        elif authentication_status == None:
-            st.warning('Informe suas credenciais de acesso.')
-        elif authentication_status:
+    st.title("Empresamix Sistemas")
+    st.markdown('<p class="subtitle">Análise de Dados (BI)</p>', unsafe_allow_html=True)
+    
+    # Formulário
+    username = st.text_input("👤 Username")
+    password = st.text_input("🔒 Password", type="password")
+    
+    if st.button("Login"):
+        if username == "admin" and password == "admin":
+            st.session_state["authentication_status"] = True
+            st.session_state["username"] = username
+            st.switch_page("Home.py")
             return True, username
-
-        st.markdown('</div>', unsafe_allow_html=True)
-        
+        else:
+            st.error("Usuário e/ou Senha incorretos")
+            return False, None
+    
+    if "authentication_status" not in st.session_state:
+        st.warning("Informe suas credenciais de acesso.")
+    
     return False, None
