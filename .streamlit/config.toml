@@ -1,27 +1,22 @@
-[theme]
-# Cor principal para botões e elementos interativos
-primaryColor = "#1E88E5"
-
-# Cor de fundo principal (azul escuro)
-backgroundColor = "#0A192F"
-
-# Cor de fundo secundária (para cards e containers)
-secondaryBackgroundColor = "#172A45"
-
-# Cor do texto
-textColor = "#FFFFFF"
-
-# Fonte
-font = "sans serif"
 
 [server]
-port = 8501
-address = "0.0.0.0"
-maxUploadSize = 200
-enableXsrfProtection = true
-enableCORS = true
+enableStaticServing = false
+runOnSave = false
 
 [browser]
-serverAddress = "localhost"
-serverPort = 8501
 gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"
+showErrorDetails = false
+
+[runner]
+fastRerunEnabled = true
+magicEnabled = false
+
+[theme]
+base = "dark"
+
+[logger]
+level = "error"
+    
