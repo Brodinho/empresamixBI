@@ -71,6 +71,19 @@ def main():
                 ],
                 module_id="operacional"
             )
+
+            create_module_container(
+                title="RH",
+                icon="👥",
+                color="#FF69B4",
+                dashboards=[
+                    "Recrutamento e Seleção",
+                    "Avaliação de Desempenho",
+                    "Treinamento e Desenvolvimento",
+                    "Folha de Pagamento"
+                ],
+                module_id="rh"
+            )
         
         # Módulo Cliente
         with cols[1]:
