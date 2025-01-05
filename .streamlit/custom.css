@@ -1,0 +1,49 @@
+/* Remove navegação lateral */
+[data-testid="stSidebarNav"],
+div[data-testid="stSidebarNav"],
+section[data-testid="stSidebarNav"] {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    position: absolute !important;
+    overflow: hidden !important;
+    z-index: -1 !important;
+}
+
+/* Remove menu e outros elementos */
+#MainMenu, footer, header,
+.stDeployButton, [data-testid="stToolbar"],
+.main-nav, [data-testid="collapsedControl"] {
+    display: none !important;
+}
+
+/* Remove botão de expandir sidebar */
+button[kind="header"],
+.css-1d391kg,
+.css-14xtw13 {
+    display: none !important;
+}
+
+/* Ajusta sidebar */
+section[data-testid="stSidebar"] > div {
+    padding-top: 0 !important;
+}
+
+/* Remove elementos de navegação específicos */
+.stApp > header,
+.stApp [data-testid="stDecoration"],
+div.element-container:has([data-testid="stSidebarNav"]) {
+    display: none !important;
+}
+
+/* Efeitos hover nos botões */
+.stButton > button {
+    transition: all 0.3s ease !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.stButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+} 

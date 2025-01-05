@@ -1,82 +1,41 @@
 import streamlit as st
-
-# Configuração da página DEVE ser a primeira chamada Streamlit
-st.set_page_config(
-    page_title="Módulo Cliente",
-    layout="wide",
-    initial_sidebar_state="expanded"
+from shared.components.sidebar import create_sidebar
+from modules.cliente.views.visualizations import (
+    satisfacao_cliente,
+    analise_churn,
+    segmentacao_clientes,
+    jornada_cliente
 )
 
-# Remove elementos padrão do Streamlit
-st.markdown("""
-    <style>
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        header {visibility: hidden;}
-        
-        /* Estilo para o sidebar */
-        .css-1d391kg {
-            padding: 2rem 1rem;
-        }
-        
-        /* Estilo para botões do sidebar */
-        .stButton button {
-            width: 100%;
-            background-color: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 0.5rem 1rem;
-            margin: 0.5rem 0;
-            border-radius: 0.5rem;
-            color: white;
-            transition: all 0.3s ease;
-        }
-        
-        .stButton button:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateX(5px);
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-# Sidebar personalizado
-with st.sidebar:
-    # Título do módulo
-    st.title("👥 Módulo Cliente")
-    st.markdown("---")
+def load_cliente_module():
+    # Configuração DEVE ser a primeira chamada Streamlit
+    st.set_page_config(
+        page_title="Módulo Cliente", 
+        layout="wide",
+        initial_sidebar_state="expanded",
+        menu_items={}
+    )
     
-    # Botões de navegação
-    dashboards = {
-        "😊 Satisfação do Cliente": "satisfacao",
-        "📉 Análise de Churn": "churn",
-        "👥 Segmentação de Clientes": "segmentacao",
-        "🛣️ Jornada do Cliente": "jornada"
+    # Carrega os estilos personalizados globais
+    with open('.streamlit/custom.css') as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+    
+    # Configuração do sidebar
+    menu_items = {
+        "Satisfação do Cliente": satisfacao_cliente.render,
+        "Análise de Churn": analise_churn.render,
+        "Segmentação de Clientes": segmentacao_clientes.render,
+        "Jornada do Cliente": jornada_cliente.render
     }
     
-    # Variável para controlar o dashboard ativo
-    if 'current_dashboard' not in st.session_state:
-        st.session_state.current_dashboard = 'satisfacao'
+    selected_dashboard = create_sidebar(
+        "Módulo Cliente",
+        menu_items.keys()
+    )
     
-    # Criar botões
-    for label, dashboard_id in dashboards.items():
-        if st.button(
-            label,
-            key=f"btn_{dashboard_id}",
-            use_container_width=True,
-            type="primary" if st.session_state.current_dashboard == dashboard_id else "secondary"
-        ):
-            st.session_state.current_dashboard = dashboard_id
+    # Renderiza o dashboard selecionado
+    if selected_dashboard in menu_items:
+        menu_items[selected_dashboard]()
 
-# Área principal
-st.title("👥 Dashboard Cliente")
-
-# Renderiza o dashboard selecionado
-current = st.session_state.current_dashboard
-if current == "satisfacao":
-    st.write("Dashboard de Satisfação do Cliente")
-elif current == "churn":
-    st.write("Dashboard de Análise de Churn")
-elif current == "segmentacao":
-    st.write("Dashboard de Segmentação de Clientes")
-elif current == "jornada":
-    st.write("Dashboard de Jornada do Cliente") 
+if __name__ == "__main__":
+    load_cliente_module() 

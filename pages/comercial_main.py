@@ -1,4 +1,14 @@
+import os
+import sys
+from pathlib import Path
+
+# Força desabilitar sistema de páginas
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from setup_pages import disable_pages
+disable_pages()
+
 import streamlit as st
+import logging
 from shared.components.sidebar import create_sidebar
 from modules.comercial.views.visualizations import (
     performance_vendas,
@@ -6,6 +16,8 @@ from modules.comercial.views.visualizations import (
     leads,
     territorio
 )
+
+logger = logging.getLogger('streamlit_app')
 
 def remove_streamlit_elements():
     """Remove elementos padrão do Streamlit"""
@@ -48,6 +60,15 @@ def remove_streamlit_elements():
             div.element-container:has([data-testid="stSidebarNav"]) {
                 display: none !important;
             }
+            
+            /* Restaura efeitos hover nos botões da home */
+            .stButton > button {
+                transition: transform 0.2s ease !important;
+            }
+            
+            .stButton > button:hover {
+                transform: translateY(-2px) !important;
+            }
         </style>
         
         <script>
@@ -67,15 +88,21 @@ def remove_streamlit_elements():
     """, unsafe_allow_html=True)
 
 def load_comercial_module():
-    # IMPORTANTE: set_page_config deve ser a primeira chamada Streamlit
+    logger.debug("=== INICIANDO MÓDULO COMERCIAL ===")
+    
+    # Configuração DEVE ser a primeira chamada Streamlit
     st.set_page_config(
-        page_title="Módulo Comercial", 
+        page_title="Módulo Comercial",
         layout="wide",
         initial_sidebar_state="expanded",
-        menu_items={}  # Remove itens do menu
+        menu_items={}
     )
     
-    # Remove elementos logo após configuração
+    # Carrega os estilos personalizados globais
+    with open('.streamlit/custom.css') as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+    
+    # Remove navegação imediatamente
     remove_streamlit_elements()
     
     # Configuração do sidebar
@@ -91,11 +118,17 @@ def load_comercial_module():
         menu_items.keys()
     )
     
+    # Remove navegação novamente após criar sidebar
+    remove_streamlit_elements()
+    
     # Renderiza o dashboard selecionado
     if selected_dashboard in menu_items:
         menu_items[selected_dashboard]()
-        # Força remoção novamente após renderização
+        # Remove navegação uma última vez
         remove_streamlit_elements()
 
 if __name__ == "__main__":
-    load_comercial_module() 
+    try:
+        load_comercial_module()
+    except Exception as e:
+        logger.error(f"Erro ao carregar módulo comercial: {str(e)}")
