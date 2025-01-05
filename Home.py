@@ -58,6 +58,19 @@ def main():
                 ],
                 module_id="financeiro"
             )
+
+            create_module_container(
+                title="Operacional",
+                icon="⚙️",
+                color="#FFB347",
+                dashboards=[
+                    "Produção",
+                    "Controle de Qualidade",
+                    "Gestão de Estoque",
+                    "Manutenção"
+                ],
+                module_id="operacional"
+            )
         
         # Módulo Cliente
         with cols[1]:
@@ -85,6 +98,21 @@ def main():
                     "ROI de Marketing"
                 ],
                 module_id="marketing"
+            )
+
+            # ... (código anterior mantido)
+            
+            create_module_container(
+                title="PCP",
+                icon="🏭",
+                color="#4A90E2",
+                dashboards=[
+                    "Planejamento da Produção",
+                    "Programação da Produção",
+                    "Análise de Capacidade",
+                    "Ordens de Produção"
+                ],
+                module_id="pcp"
             )
 
 if __name__ == "__main__":
