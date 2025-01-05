@@ -74,5 +74,18 @@ def main():
                 module_id="cliente"
             )
 
+            create_module_container(
+                title="Marketing",
+                icon="🎯",
+                color="#96CEB4",
+                dashboards=[
+                    "Campanhas de Marketing",
+                    "Análise de Mídias Sociais",
+                    "Funil de Marketing",
+                    "ROI de Marketing"
+                ],
+                module_id="marketing"
+            )
+
 if __name__ == "__main__":
     main()
