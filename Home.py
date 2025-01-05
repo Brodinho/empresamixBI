@@ -1,4 +1,7 @@
 import streamlit as st
+from core.auth.login import setup_login
+from config.settings import APP_NAME, MODULES
+from shared.components.cards import create_module_card, create_info_card, create_nav_button, create_module_container
 
 # Configuração da página DEVE ser a primeira chamada Streamlit
 st.set_page_config(
@@ -8,48 +11,15 @@ st.set_page_config(
     menu_items=None
 )
 
-# Importações após o set_page_config
-from core.auth.login import setup_login
-from config.settings import APP_NAME, MODULES
-from shared.components.cards import create_module_card, create_info_card, create_nav_button, create_module_container
-from setup_pages import setup_module_pages
-
 # Carrega os estilos personalizados globais
 with open('.streamlit/custom.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-
-# Setup silencioso das páginas
-setup_module_pages()
 
 def main():
     # Verificar autenticação
     authenticated, username = setup_login()
     
     if authenticated:
-        # Remove elementos padrão do Streamlit
-        st.markdown("""
-            <style>
-                #MainMenu {visibility: hidden;}
-                footer {visibility: hidden;}
-                header {visibility: hidden;}
-                
-                /* Esconde completamente o sidebar */
-                [data-testid="stSidebar"] {
-                    display: none !important;
-                }
-                
-                /* Remove o botão de expandir sidebar */
-                .css-1544g2n {
-                    display: none !important;
-                }
-                
-                /* Remove outros elementos do Streamlit */
-                .e8zbici0 {
-                    display: none !important;
-                }
-            </style>
-        """, unsafe_allow_html=True)
-
         # Cabeçalho
         st.title(APP_NAME)
         st.markdown("---")
@@ -59,15 +29,50 @@ def main():
         st.markdown("---")
 
         cols = st.columns(2, gap="large")
-        for idx, (module_id, module_info) in enumerate(MODULES.items()):
-            with cols[idx % 2]:
-                create_module_container(
-                    title=module_info["name"],
-                    icon=module_info["icon"],
-                    color=module_info["color"],
-                    dashboards=module_info["dashboards"],
-                    module_id=module_id
-                )
+        
+        # Módulo Comercial
+        with cols[0]:
+            create_module_container(
+                title="Comercial",
+                icon="📈",
+                color="#FF6B6B",
+                dashboards=[
+                    "Performance de Vendas",
+                    "Análise de Pipeline",
+                    "Gestão de Leads/Oportunidades",
+                    "Análise de Território"
+                ],
+                module_id="comercial"
+            )
+            
+            # Módulo Financeiro
+            create_module_container(
+                title="Financeiro",
+                icon="💰",
+                color="#4ECDC4",
+                dashboards=[
+                    "Fluxo de Caixa",
+                    "DRE",
+                    "Indicadores Financeiros",
+                    "Orçamento"
+                ],
+                module_id="financeiro"
+            )
+        
+        # Módulo Cliente
+        with cols[1]:
+            create_module_container(
+                title="Cliente",
+                icon="👥",
+                color="#45B7D1",
+                dashboards=[
+                    "Satisfação do Cliente",
+                    "Análise de Churn",
+                    "Segmentação de Clientes",
+                    "Jornada do Cliente"
+                ],
+                module_id="cliente"
+            )
 
 if __name__ == "__main__":
     main()
