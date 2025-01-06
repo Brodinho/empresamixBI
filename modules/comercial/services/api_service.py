@@ -10,7 +10,7 @@ class ComercialAPIService:
         """Faz uma requisição à API"""
         try:
             url = API_CONFIG['BASE_URL']
-            default_params = API_CONFIG['PARAMS']
+            default_params = API_CONFIG['PARAMS'].copy()  # Faz uma cópia para não modificar o original
             
             # Combina os parâmetros default com os parâmetros passados
             if params:
@@ -21,6 +21,7 @@ class ComercialAPIService:
                 params=default_params,
                 timeout=API_CONFIG['TIMEOUT']
             )
+            
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:

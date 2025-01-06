@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+    <h4 class="text-white mb-4">Análise Territorial</h4>
+    
+    <div class="row">
+        <!-- Coluna do Mapa -->
+        <div class="col-md-8 mb-4">
+            <div class="card bg-dark text-white">
+                <div class="card-body">
+                    {{ territory_map | safe }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Coluna do Ranking -->
+        <div class="col-md-4 mb-4">
+            <div class="card bg-dark text-white">
+                <div class="card-body">
+                    <div id="debug">Carregando ranking...</div>
+                    {{ region_ranking | safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    console.log("Template carregado");
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM carregado");
+        console.log("Conteúdo do ranking:", document.querySelector('#region-ranking')?.innerHTML);
+    });
+</script>
+{% endblock %} 
