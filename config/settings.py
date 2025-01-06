@@ -22,20 +22,41 @@ THEME = {
 }
 
 # Configurações de Módulos
-MODULES = {
-    "comercial": {
-        "name": "Comercial",
-        "icon": "📊",
-        "color": "#1f77b4",
-        "dashboards": ["Performance de Vendas", "Análise de Pipeline", 
-                      "Gestão de Leads/Oportunidades", "Análise de Território"]
+MODULES = [
+    {
+        "id": "comercial",
+        "title": "Comercial",
+        "description": "Gestão de vendas e pipeline comercial",
+        "icon": "💼"
     },
-    "cliente": {
-        "name": "Cliente",
-        "icon": "👥",
-        "color": "#ff7f0e",
-        "dashboards": ["Satisfação do Cliente", "Análise de Churn", 
-                      "Segmentação de Clientes", "Jornada do Cliente"]
+    {
+        "id": "financeiro",
+        "title": "Financeiro",
+        "description": "Controle financeiro e indicadores",
+        "icon": "💰"
     },
-    # ... outros módulos
-}
+    {
+        "id": "marketing",
+        "title": "Marketing",
+        "description": "Campanhas e análise de marketing",
+        "icon": "📢"
+    },
+    {
+        "id": "operacional",
+        "title": "Operacional",
+        "description": "Gestão de operações e produção",
+        "icon": "⚙️"
+    },
+    {
+        "id": "pcp",
+        "title": "PCP",
+        "description": "Planejamento e controle da produção",
+        "icon": "📋"
+    },
+    {
+        "id": "rh",
+        "title": "Recursos Humanos",
+        "description": "Gestão de pessoas e desenvolvimento",
+        "icon": "👥"
+    }
+]

@@ -1,7 +1,12 @@
 import streamlit as st
+import pandas as pd
 from core.auth.login import setup_login
+from core.auth.permissions import UserRole, Permissions
 from config.settings import APP_NAME, MODULES
-from shared.components.cards import create_module_card, create_info_card, create_nav_button, create_module_container
+from shared.components.cards import create_module_card
+from shared.utils.cursor_rules import CursorRules
+from shared.components.charts import ChartComponents
+from shared.utils.alerts import AlertManager
 
 # Configuração da página DEVE ser a primeira chamada Streamlit
 st.set_page_config(
@@ -15,118 +20,204 @@ st.set_page_config(
 with open('.streamlit/custom.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
+# Inicialização do estado da aplicação
+if 'current_module' not in st.session_state:
+    st.session_state.current_module = 'home'
+
+def render_kpi(col, label, value, delta, help, kpi_name, user_role):
+    """Renderiza um KPI se o usuário tiver permissão"""
+    if Permissions.can_view_kpi(user_role, kpi_name):
+        with col:
+            st.metric(
+                label=label,
+                value=value,
+                delta=delta,
+                help=help
+            )
+    else:
+        with col:
+            st.info("🔒 Acesso Restrito")
+
 def main():
     # Verificar autenticação
     authenticated, username = setup_login()
     
     if authenticated:
+        # Por enquanto, vamos assumir um papel de admin para teste
+        user_role = UserRole.ADMIN
+        
+        # Verifica o módulo atual e redireciona se necessário
+        current_module = st.session_state.get('current_module', 'home')
+        
+        if current_module != 'home':
+            # Aqui você pode adicionar a lógica para carregar diferentes módulos
+            st.title(f"Módulo {current_module.title()}")
+            
+            # Botão para voltar à home
+            if st.button("← Voltar para Home"):
+                st.session_state.current_module = 'home'
+                st.rerun()
+                
+            # Aqui você pode adicionar o conteúdo específico de cada módulo
+            if current_module == "comercial":
+                st.write("Conteúdo do módulo Comercial")
+                # Adicione aqui os componentes específicos do módulo comercial
+            elif current_module == "financeiro":
+                st.write("Conteúdo do módulo Financeiro")
+                # Adicione aqui os componentes específicos do módulo financeiro
+            # ... adicione outros módulos conforme necessário ...
+                
+            return  # Importante: não continua renderizando a home
+        
         # Cabeçalho
         st.title(APP_NAME)
+        
+        # Dashboard Principal com KPIs
+        st.markdown("### 📈 Visão Geral")
+        
+        # Primeira linha de KPIs
+        col1, col2, col3, col4 = st.columns(4)
+        render_kpi(
+            col1, 
+            "Faturamento Mensal", 
+            "R$ 1.5M", 
+            "+12%", 
+            "Faturamento total do mês atual",
+            "faturamento",
+            user_role
+        )
+        render_kpi(
+            col2,
+            "Margem EBITDA",
+            "25%",
+            "+5%",
+            "Margem EBITDA do período atual",
+            "margem_ebitda",
+            user_role
+        )
+        render_kpi(
+            col3,
+            "Eficiência Operacional",
+            "92%",
+            "+3%",
+            "Taxa de eficiência da produção",
+            "eficiencia",
+            user_role
+        )
+        render_kpi(
+            col4,
+            "Satisfação Clientes",
+            "4.8/5.0",
+            "+0.3",
+            "Média de satisfação dos clientes",
+            "satisfacao",
+            user_role
+        )
+
+        # Segunda linha de KPIs
+        col1, col2, col3, col4 = st.columns(4)
+        render_kpi(
+            col1,
+            "Leads Qualificados",
+            "250",
+            "+8%",
+            "Número de leads qualificados no mês",
+            "leads",
+            user_role
+        )
+        render_kpi(
+            col2,
+            "Taxa de Conversão",
+            "15%",
+            "+2%",
+            "Taxa de conversão de leads",
+            "conversao",
+            user_role
+        )
+        render_kpi(
+            col3,
+            "Turnover",
+            "3%",
+            "-1%",
+            "Taxa de turnover mensal",
+            "turnover",
+            user_role
+        )
+        render_kpi(
+            col4,
+            "Ordens em Produção",
+            "15",
+            "+2",
+            "Número de ordens em produção",
+            "ordens_producao",
+            user_role
+        )
+
+        # Gráficos principais
+        st.markdown("### 📊 Indicadores Chave")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Dados de exemplo - Faturamento últimos 6 meses
+            df_faturamento = pd.DataFrame({
+                'Mês': ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                'Faturamento': [1.2, 1.3, 1.35, 1.4, 1.45, 1.5],
+                'Meta': [1.25, 1.3, 1.35, 1.4, 1.45, 1.5]
+            })
+            
+            fig_fat = ChartComponents.create_line_chart(
+                df_faturamento,
+                x='Mês',
+                y=['Faturamento', 'Meta'],
+                title='Evolução do Faturamento (em milhões R$)'
+            )
+            st.plotly_chart(fig_fat, use_container_width=True)
+        
+        with col2:
+            # Dados de exemplo - Distribuição de vendas por região
+            df_vendas = pd.DataFrame({
+                'Região': ['Sul', 'Sudeste', 'Norte', 'Nordeste', 'Centro-Oeste'],
+                'Vendas': [280, 520, 150, 320, 180]
+            })
+            
+            fig_vendas = ChartComponents.create_pie_chart(
+                df_vendas,
+                values='Vendas',
+                names='Região',
+                title='Distribuição de Vendas por Região (em mil R$)'
+            )
+            st.plotly_chart(fig_vendas, use_container_width=True)
+
         st.markdown("---")
 
-        # Criar grid de cards informativos
+        # Alertas importantes
+        with st.expander("⚠️ Alertas Importantes"):
+            for module in MODULES:
+                if Permissions.can_access_module(user_role, module["id"]):
+                    alerts = AlertManager.get_module_alerts(module["id"], user_role)
+                    for alert_type, message in alerts:
+                        if alert_type == "warning":
+                            st.warning(message)
+                        elif alert_type == "info":
+                            st.info(message)
+                        elif alert_type == "success":
+                            st.success(message)
+
+        st.markdown("---")
+
+        # Módulos disponíveis
         st.markdown("### 📊 Módulos Disponíveis")
-        st.markdown("---")
-
-        cols = st.columns(2, gap="large")
+        col1, col2 = st.columns(2)
         
-        # Módulo Comercial
-        with cols[0]:
-            create_module_container(
-                title="Comercial",
-                icon="📈",
-                color="#FF6B6B",
-                dashboards=[
-                    "Performance de Vendas",
-                    "Análise de Pipeline",
-                    "Gestão de Leads/Oportunidades",
-                    "Análise de Território"
-                ],
-                module_id="comercial"
-            )
-            
-            # Módulo Financeiro
-            create_module_container(
-                title="Financeiro",
-                icon="💰",
-                color="#4ECDC4",
-                dashboards=[
-                    "Fluxo de Caixa",
-                    "DRE",
-                    "Indicadores Financeiros",
-                    "Orçamento"
-                ],
-                module_id="financeiro"
-            )
-
-            create_module_container(
-                title="Operacional",
-                icon="⚙️",
-                color="#FFB347",
-                dashboards=[
-                    "Produção",
-                    "Controle de Qualidade",
-                    "Gestão de Estoque",
-                    "Manutenção"
-                ],
-                module_id="operacional"
-            )
-
-            create_module_container(
-                title="RH",
-                icon="👥",
-                color="#FF69B4",
-                dashboards=[
-                    "Recrutamento e Seleção",
-                    "Avaliação de Desempenho",
-                    "Treinamento e Desenvolvimento",
-                    "Folha de Pagamento"
-                ],
-                module_id="rh"
-            )
-        
-        # Módulo Cliente
-        with cols[1]:
-            create_module_container(
-                title="Cliente",
-                icon="👥",
-                color="#45B7D1",
-                dashboards=[
-                    "Satisfação do Cliente",
-                    "Análise de Churn",
-                    "Segmentação de Clientes",
-                    "Jornada do Cliente"
-                ],
-                module_id="cliente"
-            )
-
-            create_module_container(
-                title="Marketing",
-                icon="🎯",
-                color="#96CEB4",
-                dashboards=[
-                    "Campanhas de Marketing",
-                    "Análise de Mídias Sociais",
-                    "Funil de Marketing",
-                    "ROI de Marketing"
-                ],
-                module_id="marketing"
-            )
-
-            # ... (código anterior mantido)
-            
-            create_module_container(
-                title="PCP",
-                icon="🏭",
-                color="#4A90E2",
-                dashboards=[
-                    "Planejamento da Produção",
-                    "Programação da Produção",
-                    "Análise de Capacidade",
-                    "Ordens de Produção"
-                ],
-                module_id="pcp"
-            )
+        # Distribuir os módulos em duas colunas
+        for idx, module in enumerate(MODULES):
+            if Permissions.can_access_module(user_role, module["id"]):
+                with col1 if idx % 2 == 0 else col2:
+                    create_module_card(
+                        title=module["title"],
+                        description=module["description"],
+                        icon=module["icon"]
+                    )
 
 if __name__ == "__main__":
     main()

@@ -1,23 +1,71 @@
 import streamlit as st
-import plotly.express as px
-from modules.comercial.services.data_service import get_sales_data
+import pandas as pd
+from shared.utils.cursor_rules import CursorRules
+from shared.utils.cursor_utils import CursorUtils
+from shared.components.charts import ChartComponents
+from shared.components.layouts import DashboardLayout
 
 def render():
-    """Renderiza o dashboard de performance de vendas."""
     st.title("Performance de Vendas")
     
-    # Carrega dados
-    df = get_sales_data()
+    # Dados de exemplo
+    df_vendas = pd.DataFrame({
+        'Mês': ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+        'Vendas': [150000.00, 165000.00, 180000.00, 175000.00, 190000.00, 200000.00],
+        'Meta': [160000.00, 160000.00, 170000.00, 170000.00, 180000.00, 180000.00],
+        'Crescimento': [0.00, 0.10, 0.09, -0.03, 0.09, 0.05]
+    })
     
-    # Métricas principais
-    col1, col2, col3 = st.columns(3)
+    # KPIs
+    total_vendas = df_vendas['Vendas'].sum()
+    media_vendas = df_vendas['Vendas'].mean()
+    crescimento_total = (df_vendas['Vendas'].iloc[-1] / df_vendas['Vendas'].iloc[0] - 1)
+    
+    # Layout de métricas
+    metrics = [
+        {
+            'label': 'Total de Vendas',
+            'value': CursorRules.format_currency(total_vendas)
+        },
+        {
+            'label': 'Média Mensal',
+            'value': CursorRules.format_currency(media_vendas)
+        },
+        {
+            'label': 'Crescimento',
+            'value': CursorRules.format_percentage(crescimento_total)
+        }
+    ]
+    DashboardLayout.create_metric_row(metrics)
+    
+    # Gráficos
+    col1, col2 = st.columns(2)
+    
     with col1:
-        st.metric("Vendas Totais", f"R$ {df['revenue'].sum():,.2f}")
-    with col2:
-        st.metric("Média Diária", f"R$ {df['revenue'].mean():,.2f}")
-    with col3:
-        st.metric("Total de Clientes", f"{df['customers'].sum():,}")
+        # Gráfico de vendas vs meta
+        fig_vendas = ChartComponents.create_line_chart(
+            df_vendas,
+            x='Mês',
+            y=['Vendas', 'Meta'],
+            title='Vendas vs Meta'
+        )
+        st.plotly_chart(fig_vendas, use_container_width=True)
     
-    # Gráfico de vendas ao longo do tempo
-    fig = px.line(df, x='date', y='revenue', title='Receita ao Longo do Tempo')
-    st.plotly_chart(fig, use_container_width=True) 
+    with col2:
+        # Gráfico de crescimento
+        fig_crescimento = ChartComponents.create_bar_chart(
+            df_vendas,
+            x='Mês',
+            y='Crescimento',
+            title='Crescimento Mensal'
+        )
+        st.plotly_chart(fig_crescimento, use_container_width=True)
+    
+    # Tabela de dados
+    st.subheader("Detalhamento")
+    df_formatted = CursorUtils.format_df_currency(df_vendas, ['Vendas', 'Meta'])
+    df_formatted = CursorUtils.format_df_percentage(df_formatted, ['Crescimento'])
+    
+    page = st.number_input('Página', min_value=1, value=1)
+    df_paged = CursorUtils.paginate_dataframe(df_formatted, page)
+    st.dataframe(df_paged, height=CursorRules.DEFAULT_CHART_HEIGHT) 
