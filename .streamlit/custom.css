@@ -164,4 +164,25 @@ div.element-container:has([data-testid="stSidebarNav"]) {
 .module-card:hover {
     border-color: #4CAF50;
     box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+}
+
+/* Estilos para o sidebar */
+.css-1d391kg {  /* Classe do sidebar */
+    background-color: #1E1E1E;
+}
+
+.css-1d391kg .stRadio > label {
+    color: #ffffff;
+    font-size: 1rem;
+    margin: 1rem 0;
+}
+
+.css-1d391kg .stRadio > div {
+    border-radius: 4px;
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.css-1d391kg .stRadio > div:hover {
+    background-color: #2E2E2E;
 } 

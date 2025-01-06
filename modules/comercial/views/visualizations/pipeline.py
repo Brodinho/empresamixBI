@@ -5,7 +5,7 @@ from shared.utils.cursor_utils import CursorUtils
 from shared.components.charts import ChartComponents
 from shared.components.layouts import DashboardLayout
 
-def render():
+def render_pipeline():
     st.title("Análise de Pipeline")
     
     # Dados de exemplo

@@ -5,8 +5,9 @@ from shared.utils.cursor_utils import CursorUtils
 from shared.components.charts import ChartComponents
 from shared.components.layouts import DashboardLayout
 
-def render():
-    st.title("Performance de Vendas")
+def render_performance():
+    """Renderiza o dashboard de Performance de Vendas"""
+    st.header("📈 Performance de Vendas")
     
     # Dados de exemplo
     df_vendas = pd.DataFrame({
@@ -67,5 +68,5 @@ def render():
     df_formatted = CursorUtils.format_df_percentage(df_formatted, ['Crescimento'])
     
     page = st.number_input('Página', min_value=1, value=1)
-    df_paged = CursorUtils.paginate_dataframe(df_formatted, page)
-    st.dataframe(df_paged, height=CursorRules.DEFAULT_CHART_HEIGHT) 
+    df_paged = CursorUtils.paginate_dataframe(df_formatted, page - 1, page_size=10)
+    st.dataframe(df_paged, use_container_width=True) 

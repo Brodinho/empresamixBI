@@ -7,6 +7,7 @@ from shared.components.cards import create_module_card
 from shared.utils.cursor_rules import CursorRules
 from shared.components.charts import ChartComponents
 from shared.utils.alerts import AlertManager
+from modules.comercial import render_comercial_module  # Nova importação
 
 # Configuração da página DEVE ser a primeira chamada Streamlit
 st.set_page_config(
@@ -57,14 +58,12 @@ def main():
             if st.button("← Voltar para Home"):
                 st.session_state.current_module = 'home'
                 st.rerun()
-                
-            # Aqui você pode adicionar o conteúdo específico de cada módulo
+            
+            # Carrega o módulo específico
             if current_module == "comercial":
-                st.write("Conteúdo do módulo Comercial")
-                # Adicione aqui os componentes específicos do módulo comercial
+                render_comercial_module()  # Chama a função do módulo comercial
             elif current_module == "financeiro":
                 st.write("Conteúdo do módulo Financeiro")
-                # Adicione aqui os componentes específicos do módulo financeiro
             # ... adicione outros módulos conforme necessário ...
                 
             return  # Importante: não continua renderizando a home
