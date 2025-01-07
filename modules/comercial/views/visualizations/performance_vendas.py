@@ -4,6 +4,7 @@ from shared.utils.cursor_rules import CursorRules
 from shared.utils.cursor_utils import CursorUtils
 from shared.components.charts import ChartComponents
 from shared.components.layouts import DashboardLayout
+from ..performance.timeline_faturamento import create_timeline, load_data
 
 def render_performance():
     """Renderiza o dashboard de Performance de Vendas"""
@@ -61,6 +62,29 @@ def render_performance():
             title='Crescimento Mensal'
         )
         st.plotly_chart(fig_crescimento, use_container_width=True)
+    
+    # Adiciona o gráfico de timeline após as duas colunas
+    st.subheader("Evolução do Faturamento")
+    
+    # Carrega dados do faturamento
+    df_faturamento = load_data()
+    
+    if df_faturamento is not None:
+        # Obtém os últimos 5 anos disponíveis
+        available_years = sorted(df_faturamento['data'].dt.year.unique(), reverse=True)[-5:]
+        
+        # Cria e exibe o gráfico de timeline
+        fig_timeline = create_timeline(df_faturamento, available_years)
+        if fig_timeline:
+            st.plotly_chart(
+                fig_timeline,
+                use_container_width=True,
+                config={
+                    'displayModeBar': True,
+                    'displaylogo': False,
+                    'modeBarButtonsToAdd': ['fullscreen']
+                }
+            )
     
     # Tabela de dados
     st.subheader("Detalhamento")

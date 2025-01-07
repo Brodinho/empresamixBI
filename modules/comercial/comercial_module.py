@@ -1,7 +1,7 @@
 import streamlit as st
 from .views.visualizations.analise_territorial import render_analise_territorial
 from .views.visualizations.leads import render_leads
-from .views.visualizations.performance import render_performance
+from .views.visualizations.performance_vendas import render_performance
 from .views.visualizations.pipeline import render_pipeline
 
 def render_nav_button(label: str, is_active: bool = False, key: str = None) -> bool:
