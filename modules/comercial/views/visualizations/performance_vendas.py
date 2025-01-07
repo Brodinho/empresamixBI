@@ -91,6 +91,16 @@ def render_performance():
     df_formatted = CursorUtils.format_df_currency(df_vendas, ['Vendas', 'Meta'])
     df_formatted = CursorUtils.format_df_percentage(df_formatted, ['Crescimento'])
     
-    page = st.number_input('Página', min_value=1, value=1)
-    df_paged = CursorUtils.paginate_dataframe(df_formatted, page - 1, page_size=10)
-    st.dataframe(df_paged, use_container_width=True) 
+    try:
+        # Simplificando a paginação por enquanto
+        st.dataframe(df_formatted, use_container_width=True)
+        
+        # Ou, se quiser manter a paginação, mas com validação mais simples:
+        # page = st.number_input('Página', min_value=1, value=1)
+        # start_idx = (page - 1) * 10
+        # end_idx = start_idx + 10
+        # df_paged = df_formatted.iloc[start_idx:end_idx]
+        # st.dataframe(df_paged, use_container_width=True)
+        
+    except Exception as e:
+        st.error(f"Erro ao exibir detalhamento: {str(e)}") 
