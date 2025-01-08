@@ -50,3 +50,13 @@ def format_kpi_delta(value: float, positive_is_good: bool = True) -> Tuple[str, 
         return f"↓ {formatted}", direction
     else:
         return formatted, "off"
+
+def format_tooltip_currency(value: Union[float, int]) -> str:
+    """Formata valor para moeda brasileira sem caracteres especiais (para tooltips)"""
+    try:
+        # Primeiro formata o número com pontos de milhar e vírgula decimal
+        numero = f"{value:,.2f}".replace(",", "temp").replace(".", ",").replace("temp", ".")
+        # Retorna com R sem $ e mantém o espaço
+        return f"R {numero}"
+    except:
+        return f"R 0,00"

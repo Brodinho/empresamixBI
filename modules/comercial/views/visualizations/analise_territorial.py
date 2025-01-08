@@ -1,7 +1,7 @@
 import streamlit as st
 from ...components import TerritoryMap, RegionRanking
 from ...services.api_service import ComercialAPIService
-from shared.utils.formatters import format_currency, format_percentage
+from shared.utils.formatters import format_currency, format_percentage, format_tooltip_currency
 
 def create_metrics_section(df):
     """Cria seção de métricas no topo do dashboard"""
@@ -25,19 +25,19 @@ def create_metrics_section(df):
         help_text = (
             f"Detalhamento:\n"
             f"• Estados: {total_estados} de 27 estados brasileiros\n"
-            f"• Países: {total_paises} países atendidos"
+            f"• Paises: {total_paises} paises atendidos"
         )
         st.metric(
-            "Territórios Atendidos",
-            f"{total_estados + total_paises} regiões",
+            "Territorios Atendidos",
+            f"{total_estados + total_paises} regioes",
             help=help_text
         )
     
     with col2:
         help_text = (
-            f"Composição do Faturamento:\n"
-            f"• Interno: {format_currency(faturamento_interno)}\n"
-            f"• Exportação: {format_currency(faturamento_externo)}"
+            f"Composicao do Faturamento:\n"
+            f"• Interno: {format_tooltip_currency(faturamento_interno)}\n"
+            f"• Exportacao: {format_tooltip_currency(faturamento_externo)}"
         )
         st.metric(
             "Faturamento Total",
@@ -48,9 +48,9 @@ def create_metrics_section(df):
     with col3:
         help_text = (
             f"Crescimento por Mercado:\n"
-            f"• Interno: {format_currency(faturamento_interno)}\n"
-            f"• Exportação: {format_currency(faturamento_externo)}\n\n"
-            f"Total: {format_currency(total_faturamento)}"
+            f"• Interno: {format_tooltip_currency(faturamento_interno)}\n"
+            f"• Exportacao: {format_tooltip_currency(faturamento_externo)}\n\n"
+            f"Total: {format_tooltip_currency(total_faturamento)}"
         )
         st.metric(
             "Crescimento Anual",
@@ -62,10 +62,10 @@ def create_metrics_section(df):
     with col4:
         proporcao_interno = faturamento_interno/total_faturamento
         help_text = (
-            f"Distribuição do Faturamento:\n"
-            f"• Mercado Interno: {format_currency(faturamento_interno)} ({format_percentage(proporcao_interno)})\n"
-            f"• Exportação: {format_currency(faturamento_externo)} ({format_percentage(1-proporcao_interno)})\n\n"
-            f"Exportação representa {format_percentage(faturamento_externo/faturamento_interno)} do mercado interno"
+            f"Distribuicao do Faturamento:\n"
+            f"• Mercado Interno: {format_tooltip_currency(faturamento_interno)} ({format_percentage(proporcao_interno)})\n"
+            f"• Exportacao: {format_tooltip_currency(faturamento_externo)} ({format_percentage(1-proporcao_interno)})\n\n"
+            f"Exportacao representa {format_percentage(faturamento_externo/faturamento_interno)} do mercado interno"
         )
         st.metric(
             "Mercado Interno",
