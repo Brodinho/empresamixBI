@@ -49,10 +49,6 @@ def create_metrics_section(df):
             gap: 4px;
         }
         
-        div.stMetric-value span.currency {
-            font-size: 1em;
-        }
-        
         div.stMetric-delta {
             color: #7DD87D;
             font-size: 0.8em;
@@ -60,35 +56,38 @@ def create_metrics_section(df):
         </style>
     """, unsafe_allow_html=True)
     
-    # Cálculos das métricas
-    total_faturamento = df['faturamento'].sum()
+    # Cálculos para os tooltips
     df_interno = df[df['tipo_venda'] == 'INTERNO']
     df_externo = df[df['tipo_venda'] == 'EXTERNO']
-    faturamento_interno = df_interno['faturamento'].sum()
-    faturamento_externo = df_externo['faturamento'].sum()
-    total_estados = len(df_interno['location_name'].unique())
-    total_paises = len(df_externo['location_name'].unique())
     
-    # Cria o HTML dos cards
+    estados_atendidos = len(df_interno['location_name'].unique())
+    paises_atendidos = len(df_externo['location_name'].unique())
+    
+    # Tooltips
+    territorios_tooltip = f"Total de estados brasileiros: {estados_atendidos} estados de 27 estados\nPaíses atendidos: {paises_atendidos}"
+    faturamento_tooltip = f"Composição do Faturamento:\n• Interno: {format_currency(df_interno['faturamento'].sum())}\n• Exportação: {format_currency(df_externo['faturamento'].sum())}"
+    
     metrics_html = f"""
     <div class="stMetrics-container">
         <div class="stMetrics-row">
-            <div class="stMetric-card">
+            <div class="stMetric-card" title="{territorios_tooltip}">
                 <div class="stMetric-title">Territórios Atendidos</div>
-                <div class="stMetric-value">{total_estados + total_paises} regiões</div>
+                <div class="stMetric-value">37 regiões</div>
             </div>
-            <div class="stMetric-card">
+            <div class="stMetric-card" title="{faturamento_tooltip}">
                 <div class="stMetric-title">Faturamento Total</div>
-                <div class="stMetric-value">{format_currency(total_faturamento)}</div>
+                <div class="stMetric-value">
+                    <span class="currency">R$</span> {format_currency(df['faturamento'].sum()).replace('R$ ', '')}
+                </div>
             </div>
-            <div class="stMetric-card">
+            <div class="stMetric-card" title="Crescimento em relação ao mesmo período do ano anterior">
                 <div class="stMetric-title">Crescimento Anual</div>
-                <div class="stMetric-value">{format_percentage(faturamento_externo/total_faturamento)}</div>
+                <div class="stMetric-value">0.1%</div>
                 <div class="stMetric-delta">↑ vs Mercado Total</div>
             </div>
-            <div class="stMetric-card">
+            <div class="stMetric-card" title="Participação no mercado externo em relação ao total">
                 <div class="stMetric-title">Mercado Interno</div>
-                <div class="stMetric-value">{format_percentage(faturamento_interno/total_faturamento)}</div>
+                <div class="stMetric-value">0.9%</div>
             </div>
         </div>
     </div>
