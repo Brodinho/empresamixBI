@@ -8,9 +8,9 @@ locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 def format_currency(value: Union[float, int]) -> str:
     """Formata valor para moeda brasileira"""
     try:
-        # Formata o número manualmente para garantir consistência
-        valor_formatado = f"{value:_.2f}".replace("_", ".").replace(".", ",", 1).replace("_", ".")
-        return f"R$ {valor_formatado}"
+        # Primeiro formata o número com pontos de milhar e vírgula decimal
+        numero = f"{value:,.2f}".replace(",", "temp").replace(".", ",").replace("temp", ".")
+        return f"R$ {numero}"
     except:
         return f"R$ 0,00"
 

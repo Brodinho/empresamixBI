@@ -34,6 +34,8 @@ def create_metrics_section(df):
         )
     
     with col2:
+        # Formatação brasileira do valor monetário
+        valor_formatado = format_currency(total_faturamento)  # Isso deve retornar "R$ 127.911.961,91"
         help_text = (
             f"Composicao do Faturamento:\n"
             f"• Interno: {format_tooltip_currency(faturamento_interno)}\n"
@@ -41,7 +43,7 @@ def create_metrics_section(df):
         )
         st.metric(
             "Faturamento Total",
-            format_currency(total_faturamento),
+            valor_formatado,
             help=help_text
         )
     
@@ -75,6 +77,50 @@ def create_metrics_section(df):
 
 def render_analise_territorial():
     """Renderiza a página de análise territorial"""
+    
+    # Adiciona o CSS personalizado com efeito 3D
+    st.markdown("""
+        <style>
+        [data-testid="stMetricValue"] {
+            font-size: 24px !important;
+        }
+        
+        [data-testid="stMetricLabel"] {
+            font-size: 14px !important;
+        }
+        
+        div[data-testid="metric-container"] {
+            background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+            border: 1px solid #333;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.5),
+                       -5px -5px 15px rgba(255,255,255,0.05);
+            margin: 10px 0;
+            transition: transform 0.2s ease;
+        }
+        
+        div[data-testid="metric-container"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 6px 6px 18px rgba(0,0,0,0.6),
+                       -6px -6px 18px rgba(255,255,255,0.07);
+        }
+        
+        div[data-testid="metric-container"] > label {
+            color: #7DD87D !important;
+            font-weight: 600;
+        }
+        
+        div[data-testid="metric-container"] > div {
+            color: #FFFFFF !important;
+        }
+        
+        div[data-testid="metric-container"] > div[data-testid="stMetricDelta"] {
+            color: #7DD87D !important;
+            font-size: 14px;
+        }
+        </style>
+    """, unsafe_allow_html=True)
     
     st.title("Análise Territorial")
     
