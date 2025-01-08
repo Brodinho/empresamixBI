@@ -92,15 +92,35 @@ def render_performance():
     df_formatted = CursorUtils.format_df_percentage(df_formatted, ['Crescimento'])
     
     try:
-        # Simplificando a paginação por enquanto
-        st.dataframe(df_formatted, use_container_width=True)
+        # Configurações de paginação
+        items_per_page = 10
+        total_pages = (len(df_formatted) + items_per_page - 1) // items_per_page
         
-        # Ou, se quiser manter a paginação, mas com validação mais simples:
-        # page = st.number_input('Página', min_value=1, value=1)
-        # start_idx = (page - 1) * 10
-        # end_idx = start_idx + 10
-        # df_paged = df_formatted.iloc[start_idx:end_idx]
-        # st.dataframe(df_paged, use_container_width=True)
+        col1, col2, col3 = st.columns([2, 1, 2])
+        
+        with col2:
+            current_page = st.number_input(
+                'Página',
+                min_value=1,
+                max_value=max(1, total_pages),
+                value=1,
+                help="Navegue entre as páginas"
+            )
+        
+        # Cálculo dos índices
+        start_idx = (current_page - 1) * items_per_page
+        end_idx = min(start_idx + items_per_page, len(df_formatted))
+        
+        # Exibe informação de paginação
+        st.caption(f"Mostrando registros {start_idx + 1} até {end_idx} de {len(df_formatted)}")
+        
+        # Exibe os dados paginados
+        df_paged = df_formatted.iloc[start_idx:end_idx]
+        st.dataframe(
+            df_paged,
+            use_container_width=True,
+            height=400
+        )
         
     except Exception as e:
         st.error(f"Erro ao exibir detalhamento: {str(e)}") 

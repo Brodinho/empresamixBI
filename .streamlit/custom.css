@@ -185,4 +185,68 @@ div.element-container:has([data-testid="stSidebarNav"]) {
 
 .css-1d391kg .stRadio > div:hover {
     background-color: #2E2E2E;
+}
+
+/* Remove padding/margins padrão */
+.main .block-container {
+    padding-top: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    padding-left: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    margin: 0 !important;
+    max-width: 100% !important;  /* Permite usar toda a largura disponível */
+}
+
+/* Remove espaço extra do header */
+.main .element-container:has(h1) {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Remove padding dos gráficos */
+.stPlotlyChart {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Ajusta o espaçamento entre elementos */
+.element-container {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Minimiza padding da sidebar */
+.css-1d391kg {
+    padding: 0.5rem !important;
+}
+
+/* Ajusta margens dos containers */
+div[data-testid="column"] {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Remove espaço extra do stMarkdown */
+.stMarkdown {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Ajusta o container principal */
+.stApp {
+    margin: 0 auto !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+}
+
+/* Remove margens extras do streamlit */
+.css-18e3th9 {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Ajusta o container do conteúdo */
+.css-1d391kg {
+    width: 100% !important;
+    max-width: none !important;
 } 
