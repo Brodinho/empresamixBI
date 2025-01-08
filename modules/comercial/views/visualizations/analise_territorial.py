@@ -43,6 +43,14 @@ def create_metrics_section(df):
             color: white;
             font-size: 1.5em;
             margin-bottom: 5px;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        div.stMetric-value span.currency {
+            font-size: 1em;
         }
         
         div.stMetric-delta {
