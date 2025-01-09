@@ -1,100 +1,112 @@
-import requests
+"""
+Serviço para API do módulo comercial
+"""
+import os
 import pandas as pd
+from typing import Optional
+from shared.services.base_service import BaseAPIService
+import logging
 from datetime import datetime
-from ..config import API_CONFIG
-from .geo_service import GeoService
 
-class ComercialAPIService:
-    @staticmethod
-    def _make_request(params: dict = None) -> dict:
-        """Faz uma requisição à API"""
+logger = logging.getLogger(__name__)
+
+class ComercialAPIService(BaseAPIService):
+    """Serviço responsável por gerenciar todas as chamadas à API comercial"""
+    
+    def __init__(self):
+        """Inicializa o serviço com as configurações da API"""
+        super().__init__()
+        self.base_url = os.getenv('API_BASE_URL')
+        self.client = os.getenv('VITE_API_CLIENTE')
+        self.api_id = os.getenv('VITE_API_ID')
+        self.view = os.getenv('VITE_API_VIEW')
+    
+    def _build_url(self) -> str:
+        """Constrói a URL da API com os parâmetros necessários"""
+        return f"{self.base_url}/?CLIENTE={self.client}&ID={self.api_id}&VIEW={self.view}"
+    
+    def _validate_date(self, date_str: str) -> bool:
+        """
+        Valida se a data está em um intervalo aceitável
+        
+        Args:
+            date_str (str): Data em formato string
+            
+        Returns:
+            bool: True se a data é válida, False caso contrário
+        """
         try:
-            url = API_CONFIG['BASE_URL']
-            default_params = API_CONFIG['PARAMS'].copy()  # Faz uma cópia para não modificar o original
+            date = datetime.strptime(date_str, '%Y-%m-%d')
+            # Aceita datas entre 2000 e o ano atual + 1
+            return 2000 <= date.year <= datetime.now().year + 1
+        except:
+            return False
+    
+    def _process_data(self, data: list) -> pd.DataFrame:
+        """
+        Processa os dados brutos da API
+        
+        Args:
+            data (list): Lista de dicionários com dados da API
             
-            # Combina os parâmetros default com os parâmetros passados
-            if params:
-                default_params.update(params)
-            
-            response = requests.get(
-                url,
-                params=default_params,
-                timeout=API_CONFIG['TIMEOUT']
-            )
-            
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            raise Exception(f"Erro ao acessar a API: {str(e)}")
-
-    @classmethod
-    def get_vendas_por_regiao(cls) -> pd.DataFrame:
-        """Obtém dados de vendas por região"""
-        data = cls._make_request(API_CONFIG['ENDPOINTS']['TERRITORIO']['vendas_regiao'])
-        return pd.DataFrame(data)
-
-    @classmethod
-    def get_metas_por_regiao(cls) -> pd.DataFrame:
-        """Obtém dados de metas por região"""
-        data = cls._make_request(API_CONFIG['ENDPOINTS']['TERRITORIO']['metas_regiao'])
-        return pd.DataFrame(data)
-
-    @classmethod
-    def get_detalhamento_territorio(cls, page: int = 1, items_per_page: int = 10) -> dict:
-        """Obtém detalhamento do território com paginação"""
-        params = {
-            'page': page,
-            'items_per_page': items_per_page
-        }
-        return cls._make_request(
-            API_CONFIG['ENDPOINTS']['TERRITORIO']['detalhamento'],
-            params=params
-        )
-
-    @classmethod
-    def get_vendas_mapa(cls) -> pd.DataFrame:
-        """Obtém e processa dados de vendas para o mapa"""
+        Returns:
+            pd.DataFrame: DataFrame processado
+        """
         try:
-            # Faz a requisição à API
-            data = cls._make_request()
+            # Converte para DataFrame
             df = pd.DataFrame(data)
             
-            # Converte a coluna de emissão para datetime
-            df['emissao'] = pd.to_datetime(df['emissao'])
+            # Filtra datas inválidas
+            df = df[df['data'].apply(self._validate_date)]
             
-            # Filtra os últimos 5 anos
-            data_inicial = datetime(datetime.now().year - 5, 1, 1)
-            df = df[df['emissao'] >= data_inicial]
+            # Converte data usando formato ISO
+            df['data'] = pd.to_datetime(df['data'])
+            df['ano'] = df['data'].dt.year
             
-            # Agrupa por nota fiscal
-            df_notas = df.groupby(['sequencial', 'uf', 'codPais', 'pais'])['valorfaturado'].sum().reset_index()
+            # Identifica vendas internas/externas
+            df['tipo_venda'] = df.apply(
+                lambda x: 'EXTERNO' if x['pais'] != 'BRASIL' else 'INTERNO',
+                axis=1
+            )
             
-            # Agrupa por localização
-            df_mapa = df_notas.groupby(['uf', 'codPais', 'pais'], as_index=False).agg({
-                'valorfaturado': 'sum'
-            })
+            # Remove registros com valores nulos ou inválidos
+            df = df.dropna(subset=['valorfaturado', 'uf', 'cidade', 'pais'])
             
-            # Processa dados internos e externos
-            def get_coordinates(row):
-                if row['uf'] == 'EX':
-                    # Para exportações, usa o nome do país
-                    coords = GeoService.get_location_coordinates('EX', row['pais'])
-                    location_name = row['pais']
-                else:
-                    # Para vendas internas, usa o nome completo do estado
-                    coords = GeoService.get_location_coordinates(row['uf'])
-                    location_name = GeoService.get_location_name(row['uf'])
+            logger.debug(f"Dados processados: {len(df)} registros válidos")
+            logger.debug(f"Colunas disponíveis: {df.columns.tolist()}")
+            logger.debug(f"Amostra dos dados:\n{df.head()}")
+            
+            if df.empty:
+                logger.error("Nenhum registro válido após processamento")
+                return None
                 
-                return pd.Series({
-                    'latitude': coords.get('lat'),
-                    'longitude': coords.get('lon'),
-                    'location_name': location_name,
-                    'tipo_venda': 'INTERNO' if row['uf'] != 'EX' else 'EXTERNO',
-                    'faturamento': row['valorfaturado']
-                })
-            
-            # Aplica as coordenadas e formatação
-            return df_mapa.apply(get_coordinates, axis=1)
+            return df
             
         except Exception as e:
-            raise Exception(f"Erro ao processar dados do mapa: {str(e)}") 
+            logger.error(f"Erro no processamento dos dados: {str(e)}")
+            logger.error(f"Exemplo dos dados recebidos: {data[0] if data else 'Sem dados'}")
+            return None
+    
+    def get_data(self) -> Optional[pd.DataFrame]:
+        """
+        Obtém dados da API comercial
+        
+        Returns:
+            Optional[pd.DataFrame]: DataFrame com os dados ou None em caso de erro
+        """
+        try:
+            data = self._make_request()
+            if data is None:
+                logger.error("Nenhum dado retornado pela API")
+                return None
+                
+            df = self._process_data(data)
+            if df is None or df.empty:
+                logger.error("Nenhum dado válido após processamento")
+                return None
+                
+            return df
+            
+        except Exception as e:
+            logger.error(f"Erro ao processar dados: {str(e)}")
+            return None 
