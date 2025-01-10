@@ -8,6 +8,7 @@ from modules.comercial.services import comercial_service
 from shared.components.filters import DateFilters
 from .territory_map import create_territory_map
 from .region_ranking import create_region_ranking
+from .client_distribution import create_client_distribution
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ def render_analise_territorial():
                     df = df[df['ano'].isin(anos_selecionados)]
                     logger.debug(f"Dados filtrados por anos: {anos_selecionados}")
         
-        # Layout em duas colunas
+        # Layout em três colunas
         col1, col2 = st.columns([2, 1])
         
         with col1:
@@ -62,6 +63,18 @@ def render_analise_territorial():
             except Exception as e:
                 st.error('Erro ao criar ranking de regiões')
                 logger.error(f'Erro no ranking: {str(e)}')
+        
+        # Adiciona o novo gráfico de distribuição de clientes
+        st.markdown("---")  # Separador visual
+        try:
+            client_dist = create_client_distribution(df)
+            if client_dist:
+                st.plotly_chart(client_dist, use_container_width=True)
+            else:
+                st.error('Erro ao criar distribuição de clientes')
+        except Exception as e:
+            st.error('Erro ao criar distribuição de clientes')
+            logger.error(f'Erro na distribuição: {str(e)}')
                 
     except Exception as e:
         st.error('Erro ao renderizar dashboard')
