@@ -52,7 +52,7 @@ def create_region_ranking(df: pd.DataFrame) -> go.Figure:
                         axis=1
                     ),
                     textposition='auto',
-                    hoverinfo='none'  # Remove os hovers
+                    hoverinfo='none'
                 ))
         
         # Layout
@@ -63,13 +63,13 @@ def create_region_ranking(df: pd.DataFrame) -> go.Figure:
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
             height=400,
-            # Formatação do eixo X para moeda brasileira
+            # Configuração do eixo X sem valores monetários
             xaxis=dict(
-                tickformat=",",
-                tickprefix="R$ ",
-                ticktext=[format_currency(x) for x in fig.data[0].x],
-                tickvals=fig.data[0].x,
-                tickmode="array"
+                showticklabels=False,  # Remove os rótulos do eixo
+                showgrid=True,         # Mantém as linhas de grade
+                gridcolor='rgba(128, 128, 128, 0.2)',  # Cor suave para as linhas de grade
+                zeroline=True,         # Mantém a linha do zero
+                zerolinecolor='rgba(128, 128, 128, 0.2)'  # Cor suave para a linha do zero
             )
         )
         

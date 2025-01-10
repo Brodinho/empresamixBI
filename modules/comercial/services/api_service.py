@@ -3,110 +3,75 @@ Serviço para API do módulo comercial
 """
 import os
 import pandas as pd
-from typing import Optional
-from shared.services.base_service import BaseAPIService
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import logging
-from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-class ComercialAPIService(BaseAPIService):
-    """Serviço responsável por gerenciar todas as chamadas à API comercial"""
-    
+class ComercialAPIService:
     def __init__(self):
-        """Inicializa o serviço com as configurações da API"""
-        super().__init__()
-        self.base_url = os.getenv('API_BASE_URL')
-        self.client = os.getenv('VITE_API_CLIENTE')
-        self.api_id = os.getenv('VITE_API_ID')
+        self.base_url = os.getenv('API_BASE_URL', 'http://tecnolife.empresamix.info:8077')
+        self.client = os.getenv('VITE_API_CLIENTE', 'TECNOLIFE')
+        self.api_id = os.getenv('VITE_API_ID', 'XIOPMANA')
         self.view = os.getenv('VITE_API_VIEW')
+        
+        # Configuração de retry
+        self.session = requests.Session()
+        retries = Retry(
+            total=3,  # número total de tentativas
+            backoff_factor=0.5,  # tempo de espera entre tentativas
+            status_forcelist=[500, 502, 503, 504]  # códigos HTTP para retry
+        )
+        self.session.mount('http://', HTTPAdapter(max_retries=retries))
+        self.session.mount('https://', HTTPAdapter(max_retries=retries))
     
-    def _build_url(self) -> str:
-        """Constrói a URL da API com os parâmetros necessários"""
-        return f"{self.base_url}/?CLIENTE={self.client}&ID={self.api_id}&VIEW={self.view}"
-    
-    def _validate_date(self, date_str: str) -> bool:
+    def get_data(self, cube: str = None) -> pd.DataFrame:
         """
-        Valida se a data está em um intervalo aceitável
+        Obtém dados do cubo especificado
         
         Args:
-            date_str (str): Data em formato string
-            
-        Returns:
-            bool: True se a data é válida, False caso contrário
+            cube: Nome do cubo a ser consultado (ex: "CUBO_FATURAMENTO")
         """
         try:
-            date = datetime.strptime(date_str, '%Y-%m-%d')
-            # Aceita datas entre 2000 e o ano atual + 1
-            return 2000 <= date.year <= datetime.now().year + 1
-        except:
-            return False
-    
-    def _process_data(self, data: list) -> pd.DataFrame:
-        """
-        Processa os dados brutos da API
-        
-        Args:
-            data (list): Lista de dicionários com dados da API
+            # Define o cubo a ser consultado
+            self.view = cube or self.view
             
-        Returns:
-            pd.DataFrame: DataFrame processado
-        """
-        try:
-            # Converte para DataFrame
-            df = pd.DataFrame(data)
+            # Monta a URL
+            url = f"{self.base_url}/POWERBI/?CLIENTE={self.client}&ID={self.api_id}&VIEW={self.view}"
             
-            # Filtra datas inválidas
-            df = df[df['data'].apply(self._validate_date)]
+            logger.debug(f"Consultando API: {url}")
             
-            # Converte data usando formato ISO
-            df['data'] = pd.to_datetime(df['data'])
-            df['ano'] = df['data'].dt.year
+            # Faz a requisição com timeout
+            response = self.session.get(url, timeout=30)
+            response.raise_for_status()  # Levanta exceção para status codes de erro
             
-            # Identifica vendas internas/externas
-            df['tipo_venda'] = df.apply(
-                lambda x: 'EXTERNO' if x['pais'] != 'BRASIL' else 'INTERNO',
-                axis=1
-            )
+            data = response.json()
             
-            # Remove registros com valores nulos ou inválidos
-            df = df.dropna(subset=['valorfaturado', 'uf', 'cidade', 'pais'])
+            if not data:
+                logger.error("API retornou dados vazios")
+                return pd.DataFrame()
             
-            logger.debug(f"Dados processados: {len(df)} registros válidos")
-            logger.debug(f"Colunas disponíveis: {df.columns.tolist()}")
-            logger.debug(f"Amostra dos dados:\n{df.head()}")
+            logger.debug(f"Dados recebidos com sucesso: {len(data)} registros")
+            return pd.DataFrame(data)
             
-            if df.empty:
-                logger.error("Nenhum registro válido após processamento")
-                return None
-                
-            return df
+        except requests.exceptions.ConnectionError as e:
+            logger.error(f"Erro de conexão com a API: {str(e)}")
+            st.error("Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.")
+            return pd.DataFrame()
+            
+        except requests.exceptions.Timeout as e:
+            logger.error(f"Timeout na requisição: {str(e)}")
+            st.error("A requisição excedeu o tempo limite. Tente novamente.")
+            return pd.DataFrame()
+            
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Erro na requisição: {str(e)}")
+            st.error("Erro ao acessar a API. Tente novamente mais tarde.")
+            return pd.DataFrame()
             
         except Exception as e:
-            logger.error(f"Erro no processamento dos dados: {str(e)}")
-            logger.error(f"Exemplo dos dados recebidos: {data[0] if data else 'Sem dados'}")
-            return None
-    
-    def get_data(self) -> Optional[pd.DataFrame]:
-        """
-        Obtém dados da API comercial
-        
-        Returns:
-            Optional[pd.DataFrame]: DataFrame com os dados ou None em caso de erro
-        """
-        try:
-            data = self._make_request()
-            if data is None:
-                logger.error("Nenhum dado retornado pela API")
-                return None
-                
-            df = self._process_data(data)
-            if df is None or df.empty:
-                logger.error("Nenhum dado válido após processamento")
-                return None
-                
-            return df
-            
-        except Exception as e:
-            logger.error(f"Erro ao processar dados: {str(e)}")
-            return None 
+            logger.error(f"Erro inesperado: {str(e)}")
+            st.error("Ocorreu um erro inesperado. Tente novamente mais tarde.")
+            return pd.DataFrame() 
