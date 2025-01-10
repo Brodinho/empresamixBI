@@ -14,11 +14,17 @@ def create_region_ranking(df: pd.DataFrame) -> go.Figure:
         # Cria cópia do DataFrame
         df_ranking = df.copy()
         
+        # Verifica se existe a coluna tipo_venda, se não, cria com valor padrão
+        if 'tipo_venda' not in df_ranking.columns:
+            df_ranking['tipo_venda'] = df_ranking['uf'].apply(lambda x: 'EXTERNO' if x == 'EX' else 'INTERNO')
+        
         # Trata vendas internas (mantém agrupamento por UF)
-        df_interno = df_ranking[df_ranking['uf'] != 'EX'].groupby(['uf', 'tipo_venda'])['valorfaturado'].sum().reset_index()
+        df_interno = df_ranking[df_ranking['uf'] != 'EX'].groupby('uf')['valorfaturado'].sum().reset_index()
+        df_interno['tipo_venda'] = 'INTERNO'
         
         # Trata vendas externas (agrupa por país)
-        df_externo = df_ranking[df_ranking['uf'] == 'EX'].groupby(['codPais', 'pais', 'tipo_venda'])['valorfaturado'].sum().reset_index()
+        df_externo = df_ranking[df_ranking['uf'] == 'EX'].groupby(['pais'])['valorfaturado'].sum().reset_index()
+        df_externo['tipo_venda'] = 'EXTERNO'
         df_externo['uf'] = df_externo['pais']  # Usa nome do país como identificador
         
         # Combina os DataFrames
@@ -63,13 +69,12 @@ def create_region_ranking(df: pd.DataFrame) -> go.Figure:
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
             height=400,
-            # Configuração do eixo X sem valores monetários
             xaxis=dict(
-                showticklabels=False,  # Remove os rótulos do eixo
-                showgrid=True,         # Mantém as linhas de grade
-                gridcolor='rgba(128, 128, 128, 0.2)',  # Cor suave para as linhas de grade
-                zeroline=True,         # Mantém a linha do zero
-                zerolinecolor='rgba(128, 128, 128, 0.2)'  # Cor suave para a linha do zero
+                showticklabels=False,
+                showgrid=True,
+                gridcolor='rgba(128, 128, 128, 0.2)',
+                zeroline=True,
+                zerolinecolor='rgba(128, 128, 128, 0.2)'
             )
         )
         

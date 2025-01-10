@@ -41,28 +41,71 @@ def formatar_valor_br(valor: float) -> str:
     """Formata valor monetário no padrão brasileiro"""
     return locale.currency(valor, grouping=True, symbol='R$')
 
+def prepare_data_for_chart(df: pd.DataFrame, meta_percentual: float) -> pd.DataFrame:
+    """
+    Prepara dados para o gráfico de vendas vs meta
+    """
+    try:
+        df = df.copy()
+        ano_atual = datetime.now().year
+        
+        if 'emissao' not in df.columns:
+            return pd.DataFrame()
+            
+        df['emissao'] = pd.to_datetime(df['emissao'])
+        df['ano'] = df['emissao'].dt.year
+        df['mes'] = df['emissao'].dt.month
+        
+        # Cria DataFrame base com todos os meses de 2025
+        meses = {
+            1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
+            5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
+            9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'
+        }
+        
+        df_mensal = pd.DataFrame({'mes': range(1, 13)})
+        df_mensal['Mês'] = df_mensal['mes'].map(meses)
+        
+        # Pega vendas de 2025 (se houver)
+        vendas_2025 = df[df['ano'] == ano_atual].groupby('mes')['valorfaturado'].sum().reset_index()
+        
+        # Merge com vendas (preenchendo zeros onde não há vendas)
+        df_mensal = df_mensal.merge(vendas_2025, on='mes', how='left')
+        df_mensal['Vendas'] = df_mensal['valorfaturado'].fillna(0)
+        
+        # Calcula meta baseada em 2024
+        ano_anterior = ano_atual - 1
+        faturamento_ano_anterior = df[df['ano'] == ano_anterior]['valorfaturado'].sum()
+        
+        if faturamento_ano_anterior > 0:
+            meta_mensal = (faturamento_ano_anterior * (1 + meta_percentual/100)) / 12
+        else:
+            meta_mensal = 0
+            
+        df_mensal['Meta'] = meta_mensal
+        
+        return df_mensal[['Mês', 'Vendas', 'Meta']]
+            
+    except Exception as e:
+        return pd.DataFrame()
+
 def render_performance():
     """Renderiza o dashboard de Performance de Vendas"""
-    ano_atual = datetime.now().year
-    
-    # Título com ano dinâmico
-    st.header(f"📈 Performance de Vendas")
-    st.subheader(f"Meta para {ano_atual}")
-    
-    # Botão Voltar
-    st.markdown("[← Voltar para Home](Home)")
-    
-    # Slider para definir meta
-    meta_percentual = st.slider(
-        "Percentual de aumento para Meta",
-        min_value=0,
-        max_value=100,
-        value=10,
-        step=10,
-        help="Define o percentual de aumento sobre o faturamento do ano anterior"
-    )
-    
     try:
+        # Título com ano dinâmico
+        st.header(f"📈 Performance de Vendas")
+        st.subheader(f"Meta para {datetime.now().year}")
+        
+        # Slider para definir meta
+        meta_percentual = st.slider(
+            "Percentual de aumento para Meta",
+            min_value=0,
+            max_value=100,
+            value=10,
+            step=10,
+            help="Define o percentual de aumento sobre o faturamento do ano anterior"
+        )
+        
         # Carrega dados
         api_service = ComercialAPIService()
         df_vendas = api_service.get_data()
@@ -71,64 +114,13 @@ def render_performance():
             st.error('Não foi possível carregar os dados.')
             return
             
-        # Extrai ano e mês da data de emissão
-        df_vendas['emissao'] = pd.to_datetime(df_vendas['emissao'])
-        df_vendas['ano'] = df_vendas['emissao'].dt.year
-        df_vendas['mes'] = df_vendas['emissao'].dt.month
+        # Prepara dados para o gráfico
+        df_graficos = prepare_data_for_chart(df_vendas, meta_percentual)
         
-        # Calcula meta mensal (valor fixo para todos os meses)
-        meta_mensal = calcular_meta_anual(df_vendas, meta_percentual)
-        
-        # Cria DataFrame base com todos os meses
-        meses_completos = pd.DataFrame({
-            'mes': range(1, 13),
-            'nome_mes': [calendar.month_name[i].capitalize() for i in range(1, 13)]
-        })
-        
-        # Prepara dados do ano atual
-        df_atual = df_vendas[df_vendas['ano'] == ano_atual].copy()
-        
-        if df_atual.empty:
-            df_mensal = meses_completos.copy()
-            df_mensal['valorfaturado'] = 0.0
-        else:
-            df_temp = df_atual.groupby('mes')['valorfaturado'].sum().reset_index()
-            df_mensal = pd.merge(meses_completos, df_temp, on='mes', how='left')
-            df_mensal['valorfaturado'] = df_mensal['valorfaturado'].fillna(0.0)
-        
-        # Adiciona meta fixa para todos os meses
-        df_mensal['meta'] = meta_mensal
-        
-        # Prepara DataFrame para os gráficos
-        df_graficos = pd.DataFrame({
-            'Mês': df_mensal['nome_mes'],  # Usa nome do mês em vez do número
-            'Vendas': df_mensal['valorfaturado'],
-            'Meta': df_mensal['meta'],
-            'Crescimento': df_mensal['valorfaturado'].pct_change().fillna(0) * 100
-        })
-        
-        # KPIs (mesmo com valores zerados)
-        total_vendas = df_mensal['valorfaturado'].sum()
-        media_vendas = df_mensal['valorfaturado'].mean()
-        crescimento_total = 0  # Quando não há vendas, crescimento é zero
-        
-        # Layout de métricas
-        metrics = [
-            {
-                'label': 'Total de Vendas',
-                'value': CursorRules.format_currency(total_vendas)
-            },
-            {
-                'label': 'Média Mensal',
-                'value': CursorRules.format_currency(media_vendas)
-            },
-            {
-                'label': 'Crescimento',
-                'value': CursorRules.format_percentage(crescimento_total/100)
-            }
-        ]
-        DashboardLayout.create_metric_row(metrics)
-        
+        if df_graficos.empty:
+            st.error('Erro ao preparar dados para visualização.')
+            return
+            
         # Gráficos
         col1, col2 = st.columns(2)
         
@@ -138,14 +130,6 @@ def render_performance():
                 st.plotly_chart(fig_vendas, use_container_width=True)
             else:
                 st.error('Erro ao criar gráfico de vendas vs meta')
-        
-        with col2:
-            fig_crescimento = create_monthly_growth_chart(df_graficos)
-            if fig_crescimento:
-                st.plotly_chart(fig_crescimento, use_container_width=True)
-            else:
-                st.error('Erro ao criar gráfico de crescimento')
                 
     except Exception as e:
-        logger.error(f'Erro detalhado: {str(e)}', exc_info=True)
-        st.error('Erro ao processar os dados. Verifique os logs para mais detalhes.')
+        st.error(f"Erro ao renderizar dashboard: {str(e)}")

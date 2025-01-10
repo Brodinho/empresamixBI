@@ -3,6 +3,7 @@ Dashboard de Análise Territorial
 """
 import streamlit as st
 import logging
+import pandas as pd
 from modules.comercial.services import comercial_service
 from shared.components.filters import DateFilters
 from .territory_map import create_territory_map
@@ -21,14 +22,21 @@ def render_analise_territorial():
         return
     
     try:
+        # Prepara dados para filtro de ano
+        if 'emissao' in df.columns:
+            df['emissao'] = pd.to_datetime(df['emissao'])
+            df['ano'] = df['emissao'].dt.year
+        
         # Adiciona filtro de anos
         with st.expander("🔍 Filtros de Análise"):
-            anos_selecionados = DateFilters.year_filter("analise_territorial")
-            
-            # Filtra dados por ano
-            if anos_selecionados:
-                df = df[df['ano'].isin(anos_selecionados)]
-                logger.debug(f"Dados filtrados por anos: {anos_selecionados}")
+            anos_disponiveis = sorted(df['ano'].unique()) if 'ano' in df.columns else []
+            if anos_disponiveis:
+                anos_selecionados = DateFilters.year_filter("analise_territorial")
+                
+                # Filtra dados por ano
+                if anos_selecionados:
+                    df = df[df['ano'].isin(anos_selecionados)]
+                    logger.debug(f"Dados filtrados por anos: {anos_selecionados}")
         
         # Layout em duas colunas
         col1, col2 = st.columns([2, 1])
