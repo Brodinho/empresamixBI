@@ -16,6 +16,48 @@ def render_analise_territorial():
     """Renderiza o dashboard de análise territorial"""
     st.title("Análise Territorial")
     
+    # CSS personalizado para os cards e container
+    st.markdown("""
+        <style>
+            .metrics-container {
+                background-color: rgba(255, 255, 255, 0.1);
+                border-radius: 10px;
+                padding: 20px;
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+                margin-bottom: 20px;
+            }
+            div[data-testid="metric-container"] {
+                background-color: rgba(28, 131, 225, 0.1);
+                border: 1px solid rgba(28, 131, 225, 0.1);
+                padding: 5% 5% 5% 10%;
+                border-radius: 5px;
+                color: rgb(30, 103, 119);
+                overflow-wrap: break-word;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            div[data-testid="metric-container"]:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            }
+            div[data-testid="metric-container"] > label {
+                color: rgb(30, 103, 119);
+                font-size: 1rem;
+                font-weight: 500;
+            }
+            div[data-testid="metric-container"] > div {
+                font-size: 1.5rem;
+                font-weight: 600;
+            }
+            .stMetric {
+                background-color: rgba(28, 131, 225, 0.1);
+                border-radius: 5px;
+                padding: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+        </style>
+    """, unsafe_allow_html=True)
+    
     # Carrega dados
     df = comercial_service.get_data()
     if df is None:
@@ -39,7 +81,10 @@ def render_analise_territorial():
                     df = df[df['ano'].isin(anos_selecionados)]
                     logger.debug(f"Dados filtrados por anos: {anos_selecionados}")
         
-        # Cards informativos
+        # Container com efeito 3D
+        st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
+        
+        # Cards informativos dentro do container
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
@@ -75,6 +120,9 @@ def render_analise_territorial():
                 delta=f"{perc_externos}%",
                 help="Número e percentual de clientes em outros países"
             )
+        
+        # Fecha o container
+        st.markdown('</div>', unsafe_allow_html=True)
         
         # Separador visual
         st.markdown("---")
