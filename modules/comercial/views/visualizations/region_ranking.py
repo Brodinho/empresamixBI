@@ -4,6 +4,7 @@ Visualização do Ranking de Regiões
 import plotly.graph_objects as go
 import pandas as pd
 import logging
+from shared.utils.formatters import format_currency
 
 logger = logging.getLogger(__name__)
 
@@ -13,10 +14,10 @@ def create_region_ranking(df: pd.DataFrame) -> go.Figure:
         # Cria cópia do DataFrame
         df_ranking = df.copy()
         
-        # Para vendas internas, mantém agrupamento por UF
+        # Trata vendas internas (mantém agrupamento por UF)
         df_interno = df_ranking[df_ranking['uf'] != 'EX'].groupby(['uf', 'tipo_venda'])['valorfaturado'].sum().reset_index()
         
-        # Para vendas externas, agrupa por país
+        # Trata vendas externas (agrupa por país)
         df_externo = df_ranking[df_ranking['uf'] == 'EX'].groupby(['codPais', 'pais', 'tipo_venda'])['valorfaturado'].sum().reset_index()
         df_externo['uf'] = df_externo['pais']  # Usa nome do país como identificador
         
@@ -46,8 +47,12 @@ def create_region_ranking(df: pd.DataFrame) -> go.Figure:
                     orientation='h',
                     name=tipo,
                     marker_color=colors[tipo],
-                    text=df_tipo.apply(lambda x: f"R$ {x['valorfaturado']:,.2f}<br>{x['percentual']}%", axis=1),
+                    text=df_tipo.apply(
+                        lambda x: f"{format_currency(x['valorfaturado'])} ({x['percentual']}%)",
+                        axis=1
+                    ),
                     textposition='auto',
+                    hoverinfo='none'  # Remove os hovers
                 ))
         
         # Layout
@@ -57,7 +62,15 @@ def create_region_ranking(df: pd.DataFrame) -> go.Figure:
             yaxis={'categoryorder':'total ascending'},
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            height=400
+            height=400,
+            # Formatação do eixo X para moeda brasileira
+            xaxis=dict(
+                tickformat=",",
+                tickprefix="R$ ",
+                ticktext=[format_currency(x) for x in fig.data[0].x],
+                tickvals=fig.data[0].x,
+                tickmode="array"
+            )
         )
         
         return fig

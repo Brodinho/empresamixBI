@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 import logging
+from shared.utils.formatters import format_currency
 
 logger = logging.getLogger(__name__)
 
@@ -99,12 +100,12 @@ def create_territory_map(df: pd.DataFrame) -> go.Figure:
                 line=dict(color='white', width=1)
             ),
             text=df_interno.apply(
-                lambda x: f"Estado: {x['uf']}<br>Faturamento: R$ {x['valorfaturado']:,.2f}",
+                lambda x: f"Estado: {x['uf']}<br>Faturamento: {format_currency(x['valorfaturado'])}",
                 axis=1
             ),
             name='Vendas Internas',
             hoverinfo='text',
-            showlegend=True  # Mostra na legenda
+            showlegend=True
         ))
         
         # Lista para armazenar todas as coordenadas externas
@@ -120,7 +121,7 @@ def create_territory_map(df: pd.DataFrame) -> go.Figure:
                 lats_ext.append(coords['lat'])
                 lons_ext.append(coords['lon'])
                 sizes_ext.append(calculate_marker_size(row['valorfaturado'], min_fat, max_fat))
-                texts_ext.append(f"País: {row['pais']}<br>Faturamento: R$ {row['valorfaturado']:,.2f}")
+                texts_ext.append(f"País: {row['pais']}<br>Faturamento: {format_currency(row['valorfaturado'])}")
         
         # Adiciona todos os marcadores externos em uma única trace
         if lats_ext:
