@@ -39,10 +39,50 @@ def render_analise_territorial():
                     df = df[df['ano'].isin(anos_selecionados)]
                     logger.debug(f"Dados filtrados por anos: {anos_selecionados}")
         
-        # Layout em três colunas
-        col1, col2 = st.columns([2, 1])
+        # Cards informativos
+        col1, col2, col3, col4 = st.columns(4)
         
         with col1:
+            total_clientes = df['codcli'].nunique()
+            st.metric(
+                label="Total de Clientes",
+                value=f"{total_clientes:,}".replace(",", "."),
+                help="Número total de clientes únicos atendidos no período"
+            )
+        
+        with col2:
+            total_estados = df[df['uf'] != 'EX']['uf'].nunique()
+            st.metric(
+                label="Estados Atendidos",
+                value=total_estados,
+                help="Número de estados brasileiros com clientes ativos"
+            )
+        
+        with col3:
+            total_paises = df[df['uf'] == 'EX']['pais'].nunique()
+            st.metric(
+                label="Países Atendidos",
+                value=total_paises,
+                help="Número de países estrangeiros com clientes ativos"
+            )
+        
+        with col4:
+            clientes_externos = df[df['uf'] == 'EX']['codcli'].nunique()
+            perc_externos = round((clientes_externos / total_clientes * 100), 1)
+            st.metric(
+                label="Clientes Externos",
+                value=f"{clientes_externos:,}".replace(",", "."),
+                delta=f"{perc_externos}%",
+                help="Número e percentual de clientes em outros países"
+            )
+        
+        # Separador visual
+        st.markdown("---")
+        
+        # Layout dos gráficos
+        col_map, col_rank = st.columns([2, 1])
+        
+        with col_map:
             try:
                 territory_map = create_territory_map(df)
                 if territory_map:
@@ -53,7 +93,7 @@ def render_analise_territorial():
                 st.error('Erro ao criar mapa territorial')
                 logger.error(f'Erro no mapa: {str(e)}')
         
-        with col2:
+        with col_rank:
             try:
                 region_ranking = create_region_ranking(df)
                 if region_ranking:
