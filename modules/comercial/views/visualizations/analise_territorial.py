@@ -9,6 +9,7 @@ from shared.components.filters import DateFilters
 from .territory_map import create_territory_map
 from .region_ranking import create_region_ranking
 from .client_distribution import create_client_distribution
+from modules.comercial.components import TerritoryMap, RegionRanking, VendasPorRegiao
 
 logger = logging.getLogger(__name__)
 
@@ -197,6 +198,18 @@ def render_analise_territorial():
         except Exception as e:
             st.error('Erro ao criar distribuição de clientes')
             logger.error(f'Erro na distribuição: {str(e)}')
+                
+        # Após o último gráfico existente, adicionamos apenas:
+        st.markdown("---")  # Separador visual
+        try:
+            vendas_regiao = VendasPorRegiao.create_sales_region_chart(df)
+            if vendas_regiao:
+                st.plotly_chart(vendas_regiao, use_container_width=True)
+            else:
+                st.error('Erro ao criar gráfico de vendas por região')
+        except Exception as e:
+            st.error('Erro ao criar gráfico de vendas por região')
+            logger.error(f'Erro nas vendas por região: {str(e)}')
                 
     except Exception as e:
         st.error('Erro ao renderizar dashboard')

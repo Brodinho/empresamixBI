@@ -1,7 +1,7 @@
 --- COMANDOS GIT ---
 
 git add .
-git commit -m "Etapa 27: Ajustadas formatações dos valores nos gráficos de mapa e barras horizontais"
+git commit -m "Etapa 33 (Dashboard Análise Territorial): Ajustadas as alturas dos cards"
 git push origin main
 
 --- ARQUIVOS CHAVE ---
@@ -9,6 +9,25 @@ C:\empresamixBI\shared\components\filters.py
 Arquivo que contém filtros utilizados nos dashboards, como o DateFilters, que filtra os painéis pelo
 ano escolhido.
 
+--- COMANDOS IMPORTANTES ---
+Para abrir o arquivo no VSCode com preview do markdown, você pode:
+Usar o comando direto no terminal do VSCode:
+
+code -r "C:\empresamixBI\docs\guidelines\chart_development.md"
+
+Ou seguir estes passos manuais:
+
+Ctrl + Shift + E (abre o Explorer do VSCode)
+Navegue até docs/guidelines/chart_development.md
+Clique no arquivo para abrir
+Ctrl + Shift + V (abre o preview do markdown)
+Ou clique no ícone de preview no canto superior direito (tem um ícone que parece uma lupa)
+O preview mostrará o documento formatado, com:
+Títulos hierárquicos
+Blocos de código destacados
+Listas formatadas
+Checklist interativo
+----------------------------------------------------------------------------------
 1. Ranking de Regiões:
 Top 5 estados/países por faturamento
 Gráfico de barras horizontal

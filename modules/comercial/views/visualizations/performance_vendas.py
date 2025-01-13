@@ -13,6 +13,7 @@ from .sales_vs_target import create_sales_vs_target_chart
 from .monthly_growth import create_monthly_growth_chart
 import locale
 import calendar
+from modules.comercial.components import TendenciaVendas
 
 logger = logging.getLogger(__name__)
 
@@ -131,5 +132,17 @@ def render_performance():
             else:
                 st.error('Erro ao criar gráfico de vendas vs meta')
                 
+        # Adicionar o gráfico
+        st.markdown("---")
+        try:
+            tendencia = TendenciaVendas.create_trend_chart(df_vendas)
+            if tendencia:
+                st.plotly_chart(tendencia, use_container_width=True)
+            else:
+                st.error('Erro ao criar gráfico de tendência')
+        except Exception as e:
+            st.error('Erro ao criar gráfico')
+            logger.error(f'Erro: {str(e)}')
+            
     except Exception as e:
         st.error(f"Erro ao renderizar dashboard: {str(e)}")
