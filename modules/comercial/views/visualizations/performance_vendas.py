@@ -15,6 +15,8 @@ import locale
 import calendar
 from modules.comercial.components import TendenciaVendas
 from modules.comercial.services import comercial_service
+import plotly.graph_objects as go
+from shared.utils.formatters import format_currency, format_number
 
 logger = logging.getLogger(__name__)
 
@@ -108,23 +110,7 @@ def render_performance():
             st.error('Não foi possível carregar os dados.')
             return
             
-        # Prepara dados para filtro de ano
-        if 'emissao' in df_vendas.columns:
-            df_vendas['emissao'] = pd.to_datetime(df_vendas['emissao'])
-            df_vendas['ano'] = df_vendas['emissao'].dt.year
-            
-            # Adiciona filtro de anos logo após o carregamento dos dados
-            with st.expander("🔍 Filtros de Análise"):
-                anos_disponiveis = sorted(df_vendas['ano'].unique())
-                if anos_disponiveis:
-                    anos_selecionados = DateFilters.year_filter("performance_vendas")
-                    logger.debug(f"Anos disponíveis: {anos_disponiveis}")
-                    logger.debug(f"Anos selecionados: {anos_selecionados}")
-                    
-                    # Aplica filtro apenas se houver anos selecionados
-                    if anos_selecionados and len(anos_selecionados) > 0:
-                        df_vendas = df_vendas[df_vendas['ano'].isin(anos_selecionados)]
-                        logger.debug(f"Dados filtrados por anos: {df_vendas.shape[0]} registros restantes")
+        
         
         # Slider para definir meta
         meta_percentual = st.slider(
@@ -155,7 +141,30 @@ def render_performance():
                 
         # Adicionar o gráfico
         st.markdown("---")
+
+        # Prepara dados para filtro de ano
+        if 'emissao' in df_vendas.columns:
+            df_vendas['emissao'] = pd.to_datetime(df_vendas['emissao'])
+            df_vendas['ano'] = df_vendas['emissao'].dt.year
+            
+            # Adiciona filtro de anos logo após o carregamento dos dados
+            with st.expander("🔍 Filtros de Análise"):
+                anos_disponiveis = sorted(df_vendas['ano'].unique())
+                if anos_disponiveis:
+                    anos_selecionados = DateFilters.year_filter("performance_vendas")
+                    logger.debug(f"Anos disponíveis: {anos_disponiveis}")
+                    logger.debug(f"Anos selecionados: {anos_selecionados}")
+                    
+                    # Aplica filtro apenas se houver anos selecionados
+                    if anos_selecionados and len(anos_selecionados) > 0:
+                        df_vendas = df_vendas[df_vendas['ano'].isin(anos_selecionados)]
+                        logger.debug(f"Dados filtrados por anos: {df_vendas.shape[0]} registros restantes")
+
         try:
+            # Renderiza o texto de ajuda
+            TendenciaVendas.render_help_text(st)
+
+            # Renderiza o gráfico
             tendencia = TendenciaVendas.create_trend_chart(df_vendas)
             if tendencia:
                 st.plotly_chart(tendencia, use_container_width=True)
@@ -229,6 +238,10 @@ def render_performance_vendas():
         
         # Demais gráficos usando df filtrado
         try:
+            # Renderiza o texto de ajuda
+            TendenciaVendas.render_help_text(st)
+
+            # Renderiza o gráfico
             tendencia = TendenciaVendas.create_trend_chart(df)
             if tendencia:
                 st.plotly_chart(tendencia, use_container_width=True)
@@ -241,3 +254,83 @@ def render_performance_vendas():
     except Exception as e:
         st.error('Erro ao renderizar dashboard')
         logger.error(f'Erro na renderização: {str(e)}')
+
+def create_trend_chart(df: pd.DataFrame) -> go.Figure:
+    """Cria gráfico de tendência de vendas"""
+    try:
+        # Prepara os dados
+        df = df.copy()
+        df['emissao'] = pd.to_datetime(df['emissao'])
+        df = df.sort_values('emissao')
+        
+        # Calcula o valor máximo para ajustar a escala
+        max_valor = df['valorfaturado'].max()
+        intervalo = 200000  # 200 mil
+        y_max = ((max_valor // intervalo) + 1) * intervalo
+        
+        # Gera valores para o eixo Y
+        y_valores = list(range(0, int(y_max) + intervalo, intervalo))
+        y_textos = [format_currency(val) for val in y_valores]
+        
+        # Prepara os valores formatados para o hover
+        df['valor_formatado'] = df['valorfaturado'].apply(format_currency)
+        
+        # Cria o gráfico
+        fig = go.Figure()
+        
+        # Adiciona a linha de tendência
+        fig.add_trace(go.Scatter(
+            x=df['emissao'],
+            y=df['valorfaturado'],
+            mode='lines',
+            name='Vendas',
+            line=dict(color='#2E93fA', width=2),
+            customdata=df[['valor_formatado']],
+            hovertemplate='Valor: %{customdata[0]}<extra></extra>'
+        ))
+        
+        # Atualiza o layout
+        fig.update_layout(
+            title='Tendência de Vendas',
+            xaxis_title='Período',
+            yaxis_title='Valor Faturado',
+            hovermode='x unified',
+            yaxis=dict(
+                tickmode='array',
+                tickvals=y_valores,
+                ticktext=y_textos,
+                range=[0, max(y_valores)]
+            ),
+            xaxis=dict(
+                dtick='M1',
+                tickformat='%B/%Y'
+            ),
+            hoverlabel=dict(
+                bgcolor="#1e1e1e",
+                font_size=12,
+                font_family="Arial",
+                font=dict(color="white"),
+                bordercolor="#2E93fA"
+            )
+        )
+        
+        # Traduz os meses para português
+        meses_pt = {
+            'January': 'Janeiro', 'February': 'Fevereiro', 'March': 'Março',
+            'April': 'Abril', 'May': 'Maio', 'June': 'Junho',
+            'July': 'Julho', 'August': 'Agosto', 'September': 'Setembro',
+            'October': 'Outubro', 'November': 'Novembro', 'December': 'Dezembro'
+        }
+        
+        # Atualiza os rótulos do eixo X para português
+        fig.update_xaxes(
+            ticktext=[f"{meses_pt[d.strftime('%B')]}/{d.strftime('%Y')}" 
+                     for d in pd.date_range(df['emissao'].min(), df['emissao'].max(), freq='M')],
+            tickvals=pd.date_range(df['emissao'].min(), df['emissao'].max(), freq='M')
+        )
+        
+        return fig
+        
+    except Exception as e:
+        logger.error(f"Erro ao criar gráfico de tendência: {str(e)}")
+        return None
