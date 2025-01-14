@@ -14,11 +14,14 @@ from .monthly_growth import create_monthly_growth_chart
 import locale
 import calendar
 from modules.comercial.components import TendenciaVendas
+from modules.comercial.services import comercial_service
 
 logger = logging.getLogger(__name__)
 
 # Configura locale para português brasileiro
 locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+
+logging.basicConfig(level=logging.DEBUG)
 
 def calcular_meta_anual(df: pd.DataFrame, percentual_aumento: float) -> float:
     """Calcula meta anual baseada no faturamento total do ano anterior + percentual"""
@@ -97,6 +100,32 @@ def render_performance():
         st.header(f"📈 Performance de Vendas")
         st.subheader(f"Meta para {datetime.now().year}")
         
+        # Carrega dados
+        api_service = ComercialAPIService()
+        df_vendas = api_service.get_data()
+        
+        if df_vendas is None or df_vendas.empty:
+            st.error('Não foi possível carregar os dados.')
+            return
+            
+        # Prepara dados para filtro de ano
+        if 'emissao' in df_vendas.columns:
+            df_vendas['emissao'] = pd.to_datetime(df_vendas['emissao'])
+            df_vendas['ano'] = df_vendas['emissao'].dt.year
+            
+            # Adiciona filtro de anos logo após o carregamento dos dados
+            with st.expander("🔍 Filtros de Análise"):
+                anos_disponiveis = sorted(df_vendas['ano'].unique())
+                if anos_disponiveis:
+                    anos_selecionados = DateFilters.year_filter("performance_vendas")
+                    logger.debug(f"Anos disponíveis: {anos_disponiveis}")
+                    logger.debug(f"Anos selecionados: {anos_selecionados}")
+                    
+                    # Aplica filtro apenas se houver anos selecionados
+                    if anos_selecionados and len(anos_selecionados) > 0:
+                        df_vendas = df_vendas[df_vendas['ano'].isin(anos_selecionados)]
+                        logger.debug(f"Dados filtrados por anos: {df_vendas.shape[0]} registros restantes")
+        
         # Slider para definir meta
         meta_percentual = st.slider(
             "Percentual de aumento para Meta",
@@ -107,14 +136,6 @@ def render_performance():
             help="Define o percentual de aumento sobre o faturamento do ano anterior"
         )
         
-        # Carrega dados
-        api_service = ComercialAPIService()
-        df_vendas = api_service.get_data()
-        
-        if df_vendas is None or df_vendas.empty:
-            st.error('Não foi possível carregar os dados.')
-            return
-            
         # Prepara dados para o gráfico
         df_graficos = prepare_data_for_chart(df_vendas, meta_percentual)
         
@@ -146,3 +167,77 @@ def render_performance():
             
     except Exception as e:
         st.error(f"Erro ao renderizar dashboard: {str(e)}")
+
+def render_performance_vendas():
+    """Renderiza o dashboard de performance de vendas"""
+    # Título principal
+    st.title("Performance de Vendas")
+    
+    # Carrega dados
+    df = comercial_service.get_data()
+    if df is None:
+        st.error('Não foi possível carregar os dados.')
+        return
+    
+    try:
+        # Prepara dados para filtro de ano
+        if 'emissao' in df.columns:
+            df['emissao'] = pd.to_datetime(df['emissao'])
+            df['ano'] = df['emissao'].dt.year
+            
+            # Cria uma cópia do DataFrame original para o gráfico de Vendas vs Meta
+            df_vendas_meta = df.copy()
+            
+            # Adiciona filtro de anos logo após o carregamento dos dados
+            with st.expander("🔍 Filtros de Análise"):
+                anos_disponiveis = sorted(df['ano'].unique())
+                if anos_disponiveis:
+                    anos_selecionados = DateFilters.year_filter("performance_vendas")
+                    logger.debug(f"Anos disponíveis: {anos_disponiveis}")
+                    logger.debug(f"Anos selecionados: {anos_selecionados}")
+                    
+                    # Aplica filtro apenas se houver anos selecionados
+                    if anos_selecionados and len(anos_selecionados) > 0:
+                        df = df[df['ano'].isin(anos_selecionados)]
+                        logger.debug(f"Dados filtrados por anos: {df.shape[0]} registros restantes")
+        
+        # Título da seção de meta
+        st.subheader(f"Meta para {datetime.now().year}")
+        
+        # Slider para definir meta
+        meta_percentual = st.slider(
+            "Percentual de aumento para Meta",
+            min_value=0,
+            max_value=100,
+            value=10,
+            step=10,
+            help="Define o percentual de aumento sobre o faturamento do ano anterior"
+        )
+        
+        # Gráfico de Vendas vs Meta (usando df_vendas_meta - sem filtro)
+        try:
+            vendas_meta = create_sales_vs_target_chart(df_vendas_meta, meta_percentual)
+            if vendas_meta:
+                st.plotly_chart(vendas_meta, use_container_width=True)
+            else:
+                st.error('Erro ao criar gráfico de vendas vs meta')
+        except Exception as e:
+            st.error('Erro ao criar gráfico de vendas vs meta')
+            logger.error(f'Erro no gráfico de vendas vs meta: {str(e)}')
+        
+        st.markdown("---")  # Separador visual
+        
+        # Demais gráficos usando df filtrado
+        try:
+            tendencia = TendenciaVendas.create_trend_chart(df)
+            if tendencia:
+                st.plotly_chart(tendencia, use_container_width=True)
+            else:
+                st.error('Erro ao criar gráfico de tendência')
+        except Exception as e:
+            st.error('Erro ao criar gráfico de tendência')
+            logger.error(f'Erro no gráfico de tendência: {str(e)}')
+                
+    except Exception as e:
+        st.error('Erro ao renderizar dashboard')
+        logger.error(f'Erro na renderização: {str(e)}')
