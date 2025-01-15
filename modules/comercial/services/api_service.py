@@ -7,6 +7,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 import logging
+from typing import List
 
 logger = logging.getLogger(__name__)
 
@@ -74,4 +75,42 @@ class ComercialAPIService:
         except Exception as e:
             logger.error(f"Erro inesperado: {str(e)}")
             st.error("Ocorreu um erro inesperado. Tente novamente mais tarde.")
+            return pd.DataFrame() 
+
+    def get_dados_rfv(self, anos_selecionados: List[int]) -> pd.DataFrame:
+        """
+        Obtém os dados para análise RFV
+        """
+        try:
+            # Usa o método get_data() que já está funcionando
+            df = self.get_data("CUBO_FATURAMENTO")
+            
+            if df.empty:
+                logger.warning("Nenhum dado retornado da API")
+                return pd.DataFrame()
+            
+            # Converte datas com tratamento de erros
+            df['data'] = pd.to_datetime(df['data'], errors='coerce')
+            df = df.dropna(subset=['data'])  # Remove linhas com datas inválidas
+            
+            # Filtra por anos selecionados
+            df['ano'] = df['data'].dt.year
+            df = df[df['ano'].isin(anos_selecionados)]
+            
+            # Calcula métricas RFV
+            if not df.empty:
+                df = df.groupby('codcli').agg({
+                    'data': lambda x: (pd.Timestamp.now() - x.max()).days,  # Recência
+                    'nota': 'count',  # Frequência (contagem de notas fiscais)
+                    'valorfaturado': 'sum'  # Valor total
+                }).reset_index()
+                
+                # Renomeia as colunas
+                df.columns = ['cliente_id', 'recencia', 'frequencia', 'valor']
+            
+            logger.info(f"Dados RFV processados: {len(df)} registros")
+            return df
+            
+        except Exception as e:
+            logger.error(f"Erro ao processar dados RFV: {str(e)}")
             return pd.DataFrame() 

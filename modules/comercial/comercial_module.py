@@ -3,6 +3,7 @@ from .views.visualizations.analise_territorial import render_analise_territorial
 from .views.visualizations.leads import render_leads
 from .views.visualizations.performance_vendas import render_performance
 from .views.visualizations.pipeline import render_pipeline
+from .views.visualizations.rfv import render_rfv
 
 def render_nav_button(label: str, is_active: bool = False, key: str = None) -> bool:
     """Renderiza um botão de navegação estilizado no sidebar"""
@@ -54,6 +55,11 @@ def render_comercial_module():
     if render_nav_button("🔄 Pipeline", current_page == 'pipeline', 'nav_pipeline'):
         current_page = 'pipeline'
         st.session_state.comercial_page = 'pipeline'
+        
+    # Novo botão RFV
+    if render_nav_button("💎 Análise RFV", current_page == 'rfv', 'nav_rfv'):
+        current_page = 'rfv'
+        st.session_state.comercial_page = 'rfv'
     
     # Renderiza o conteúdo baseado na página atual
     if current_page == 'territorial':
@@ -64,6 +70,8 @@ def render_comercial_module():
         render_performance()
     elif current_page == 'pipeline':
         render_pipeline()
+    elif current_page == 'rfv':
+        render_rfv()
     else:
         # Mensagem de boas-vindas e instruções
         st.markdown("""
@@ -75,4 +83,5 @@ def render_comercial_module():
         - **Leads**: Acompanhe e gerencie seus leads
         - **Performance de Vendas**: Analise o desempenho comercial
         - **Pipeline**: Monitore seu funil de vendas
+        - **Análise RFV**: Analise Recência, Frequência e Valor dos clientes
         """)
