@@ -1,7 +1,7 @@
-
 [server]
 enableStaticServing = false
 runOnSave = false
+enableCORS = false
 
 [browser]
 gatherUsageStats = false
@@ -19,4 +19,7 @@ base = "dark"
 
 [logger]
 level = "error"
+
+[theme.customCSS]
+path = "assets/styles/custom.css"
     

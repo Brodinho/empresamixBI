@@ -18,14 +18,45 @@ def render_performance_vendedores():
     try:
         st.title("🎯 Performance de Vendedores")
         
-        # Carrega os dados
+        # Carrega dados primeiro
         df = comercial_service.get_data()
-        
         if df is None or df.empty:
+            logger.error("Dados não carregados em Performance de Vendedores")
             st.error('Não foi possível carregar os dados.')
             return
         
-        # Filtros de data
+        # Container para as métricas
+        metrics_container = st.container()
+        
+        with metrics_container:
+            # Cria as colunas para métricas dentro do container
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                faturamento_total = df['valorfaturado'].sum()
+                st.metric(
+                    label="💰 Faturamento Total",
+                    value=format_currency(faturamento_total),
+                    help="Valor total faturado no período"
+                )
+                
+            with col2:
+                total_vendedores = len(df['vendedor'].unique())
+                st.metric(
+                    label="👥 Total de Vendedores",
+                    value=total_vendedores,
+                    help="Número de vendedores ativos no período"
+                )
+                
+            with col3:
+                ticket_medio = df['valorfaturado'].sum() / len(df['nota'].unique())
+                st.metric(
+                    label="🎫 Ticket Médio",
+                    value=format_currency(ticket_medio),
+                    help="Valor médio por venda no período"
+                )
+        
+        # Filtros após as métricas
         with st.expander("🔍 Filtros de Análise"):
             if 'emissao' in df.columns:
                 df['emissao'] = pd.to_datetime(df['emissao'])
@@ -39,28 +70,8 @@ def render_performance_vendedores():
                         df = df[df['ano'].isin(anos_selecionados)]
         
         if not df.empty:
-            # Métricas principais
-            col1, col2, col3 = st.columns(3)
-            
-            with col1:
-                st.metric(
-                    label="💰 Faturamento Total",
-                    value=format_currency(df['valorfaturado'].sum())
-                )
-                
-            with col2:
-                total_vendedores = len(df['vendedor'].unique())
-                st.metric(
-                    label="👥 Total de Vendedores",
-                    value=total_vendedores
-                )
-                
-            with col3:
-                ticket_medio = df['valorfaturado'].sum() / len(df['nota'].unique())
-                st.metric(
-                    label="🎫 Ticket Médio",
-                    value=format_currency(ticket_medio)
-                )
+            # Debug: Verifica se chegou na renderização dos cards
+            logger.debug("Iniciando renderização dos cards em Performance de Vendedores")
             
             # Separador
             st.markdown("---")
@@ -145,5 +156,5 @@ def render_performance_vendedores():
             st.warning("Nenhum dado encontrado para o período selecionado.")
             
     except Exception as e:
-        st.error('Erro ao renderizar dashboard de Performance de Vendedores')
-        logger.error(f'Erro na renderização: {str(e)}') 
+        logger.error(f"Erro na renderização de Performance de Vendedores: {str(e)}")
+        st.error('Erro ao renderizar dashboard') 
