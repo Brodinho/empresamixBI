@@ -25,6 +25,11 @@ def criar_evolucao_individual(df: pd.DataFrame) -> go.Figure:
             values='valorfaturado'
         ).fillna(0)
         
+        # Calcula os valores para os ticks do eixo Y
+        y_max = evolucao_pivot.max().max()
+        y_step = y_max / 7  # Divide em 7 partes
+        y_ticks = [i * y_step for i in range(8)]  # Cria 8 pontos
+        
         # Cria o gráfico
         fig = go.Figure()
         
@@ -53,27 +58,28 @@ def criar_evolucao_individual(df: pd.DataFrame) -> go.Figure:
         fig.update_layout(
             title={
                 'text': 'Evolução de Vendas por Vendedor',
-                'y': 0.95,
+                'y': 1,
                 'x': 0.5,
                 'xanchor': 'center',
                 'yanchor': 'top'
             },
+            margin=dict(t=120, l=50),
             xaxis_title='Período',
-            yaxis_title='Valor Faturado',
-            template='plotly_dark',
+            yaxis=dict(
+                title='Valor Faturado',
+                tickvals=y_ticks,
+                ticktext=[format_currency(v) for v in y_ticks]
+            ),
             height=400,
+            template='plotly_dark',
             showlegend=True,
             legend=dict(
                 orientation="h",
-                yanchor="bottom",
-                y=1.02,
-                xanchor="right",
-                x=1
-            ),
-            # Formata os valores do eixo Y
-            yaxis=dict(
-                tickformat="R$,.0f",
-                hoverformat="R$,.2f"
+                yanchor="top",
+                y=1.1,
+                xanchor="left",
+                x=0,
+                bgcolor='rgba(0,0,0,0)'
             ),
             hovermode='x unified'
         )

@@ -114,12 +114,25 @@ def render_performance_vendedores():
                 with st.expander("ℹ️ Como interpretar este gráfico?"):
                     st.markdown("""
                         Este gráfico mostra a distribuição das vendas por categoria de produtos:
-                        - 📦 **Níveis**: Vendedor > Grupo > Subgrupo
-                        - 🎨 **Cores**: Quanto mais escuro, maior o valor
-                        - 📊 **Tamanho**: Proporcional ao valor faturado
                         
-                        💡 **Dica**: Identifique a especialidade de cada vendedor e 
-                        oportunidades de diversificação do mix de produtos.
+                        📂 **Níveis:**
+                        • Vendedor > Grupo > Subgrupo
+                        
+                        🎨 **Cores:**
+                        • Quanto mais escuro, maior o valor
+                        
+                        📊 **Tamanho:**
+                        • Proporcional ao valor faturado
+                        
+                        **% do Total representa:**
+                        • Vendedor: % do faturamento total do período
+                        • Grupo: % do total do vendedor
+                        • Subgrupo: % do total do grupo
+                        
+                        💡 **Dica:**
+                        • Identifique a especialidade de cada vendedor
+                        • Analise oportunidades de diversificação do mix de produtos
+                        • Compare a distribuição entre diferentes vendedores
                     """)
                 
                 fig_mix = criar_mix_produtos_vendedor(df)
