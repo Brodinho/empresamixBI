@@ -1,0 +1,1 @@
+from shared.utils.visualizations.insights_cards import render_metrics_section

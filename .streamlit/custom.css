@@ -1,0 +1,252 @@
+/* Remove navegação lateral */
+[data-testid="stSidebarNav"],
+div[data-testid="stSidebarNav"],
+section[data-testid="stSidebarNav"] {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    position: absolute !important;
+    overflow: hidden !important;
+    z-index: -1 !important;
+}
+
+/* Remove menu e outros elementos */
+#MainMenu, footer, header,
+.stDeployButton, [data-testid="stToolbar"],
+.main-nav, [data-testid="collapsedControl"] {
+    display: none !important;
+}
+
+/* Remove botão de expandir sidebar */
+button[kind="header"],
+.css-1d391kg,
+.css-14xtw13 {
+    display: none !important;
+}
+
+/* Ajusta sidebar */
+section[data-testid="stSidebar"] > div {
+    padding-top: 0 !important;
+}
+
+/* Remove elementos de navegação específicos */
+.stApp > header,
+.stApp [data-testid="stDecoration"],
+div.element-container:has([data-testid="stSidebarNav"]) {
+    display: none !important;
+}
+
+/* Efeitos hover nos botões */
+.stButton > button {
+    transition: all 0.3s ease !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.stButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Estilos gerais */
+.stApp {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Estilos para os cards de módulos */
+.module-card {
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    background: #1E1E1E;
+    border: 1px solid #333;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.module-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    border-color: #4CAF50;
+}
+
+.module-card .icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.module-card h3 {
+    color: #fff;
+    margin: 0.5rem 0;
+    font-size: 1.5rem;
+}
+
+.module-card p {
+    color: #ccc;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Estilos para links nos cards */
+.module-card a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Estilos para hover nos links */
+.module-card a:hover {
+    text-decoration: none;
+}
+
+/* Estilos para cards clicáveis */
+.module-card.clickable {
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.module-card.clickable::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.1);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.module-card.clickable:hover::before {
+    opacity: 1;
+}
+
+.module-card.clickable:active {
+    transform: scale(0.98);
+}
+
+/* Esconde apenas os botões dos cards (usando um seletor mais específico) */
+.module-card [data-testid="stButton"] > button {
+    display: none;
+}
+
+/* OU alternativamente, podemos usar uma classe específica */
+.hidden-button [data-testid="stButton"] > button {
+    display: none;
+}
+
+/* Estilo para os botões invisíveis dos cards */
+.hidden-button [data-testid="stButton"] > button {
+    opacity: 0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+/* Estilo para os botões normais */
+[data-testid="stButton"] > button {
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    background-color: #1E1E1E;
+    color: white;
+    border: 1px solid #333;
+}
+
+[data-testid="stButton"] > button:hover {
+    border-color: #4CAF50;
+    background-color: #2E2E2E;
+}
+
+/* Estilos para o efeito de hover */
+.module-card:hover {
+    border-color: #4CAF50;
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+}
+
+/* Estilos para o sidebar */
+.css-1d391kg {  /* Classe do sidebar */
+    background-color: #1E1E1E;
+}
+
+.css-1d391kg .stRadio > label {
+    color: #ffffff;
+    font-size: 1rem;
+    margin: 1rem 0;
+}
+
+.css-1d391kg .stRadio > div {
+    border-radius: 4px;
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.css-1d391kg .stRadio > div:hover {
+    background-color: #2E2E2E;
+}
+
+/* Remove padding/margins padrão */
+.main .block-container {
+    padding-top: 0.5rem !important;
+    padding-right: 0.5rem !important;
+    padding-left: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    margin: 0 !important;
+    max-width: 100% !important;  /* Permite usar toda a largura disponível */
+}
+
+/* Remove espaço extra do header */
+.main .element-container:has(h1) {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Remove padding dos gráficos */
+.stPlotlyChart {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Ajusta o espaçamento entre elementos */
+.element-container {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Minimiza padding da sidebar */
+.css-1d391kg {
+    padding: 0.5rem !important;
+}
+
+/* Ajusta margens dos containers */
+div[data-testid="column"] {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Remove espaço extra do stMarkdown */
+.stMarkdown {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Ajusta o container principal */
+.stApp {
+    margin: 0 auto !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+}
+
+/* Remove margens extras do streamlit */
+.css-18e3th9 {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Ajusta o container do conteúdo */
+.css-1d391kg {
+    width: 100% !important;
+    max-width: none !important;
+} 

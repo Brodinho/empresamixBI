@@ -1,0 +1,25 @@
+[server]
+enableStaticServing = false
+runOnSave = false
+enableCORS = false
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"
+showErrorDetails = false
+
+[runner]
+fastRerunEnabled = true
+magicEnabled = false
+
+[theme]
+base = "dark"
+
+[logger]
+level = "error"
+
+[theme.customCSS]
+path = "assets/styles/custom.css"
+    

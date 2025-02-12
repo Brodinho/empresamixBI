@@ -1,0 +1,24 @@
+----- GRÁFICO DE RECÊNCIA (Dados RFV) -----
+1. Estrutura do Gráfico:
+- As barras azuis representam a distribuição dos clientes por recência
+- A linha azul suave mostra a tendência geral dessa distribuição
+- As linhas tracejadas (laranja e verde) mostram a mediana e média respectivamente
+
+2. Interpretação dos Valores:
+- Dias: Representa há quantos dias o cliente fez sua última compra
+- Densidade: É uma medida estatística que mostra a concentração de clientes em cada período
+- Quanto maior a densidade, mais clientes fizeram sua última compra naquele período
+- No exemplo da imagem:
+    - Em 234 dias: densidade de 0.0010 (maior concentração)
+    - Em 243 dias: densidade de 0.0004 (menor concentração)
+    
+3. O que isso significa na prática:
+- As barras mais altas (maior densidade) indicam períodos onde muitos clientes fizeram sua última compra
+- A mediana de 554 dias indica que:
+    - Metade dos clientes fez a última compra há menos de 554 dias
+    - Metade fez há mais de 554 dias
+- A concentração maior de clientes (barras mais altas) à esquerda do gráfico é positiva, pois indica mais clientes ativos recentemente
+- Insights para o negócio:
+    - Clientes que não compram há muito tempo (direita do gráfico) podem precisar de ações de reativação
+    - Alta concentração de clientes com compras recentes (esquerda do gráfico) indica base ativa de clientes
+    - A diferença entre média e mediana pode indicar dispersão dos dados (alguns clientes muito antigos "puxando" a média)

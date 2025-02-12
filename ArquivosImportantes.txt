@@ -1,0 +1,62 @@
+--- COMANDOS GIT ---
+
+git add .
+git commit -m "Etapa 33 (Dashboard Análise Territorial): Ajustadas as alturas dos cards"
+git push origin main
+
+--- ARQUIVOS CHAVE ---
+C:\empresamixBI\shared\components\filters.py
+Arquivo que contém filtros utilizados nos dashboards, como o DateFilters, que filtra os painéis pelo
+ano escolhido.
+
+--- COMANDOS IMPORTANTES ---
+Para abrir o arquivo no VSCode com preview do markdown, você pode:
+Usar o comando direto no terminal do VSCode:
+
+code -r "C:\empresamixBI\docs\guidelines\chart_development.md"
+
+Ou seguir estes passos manuais:
+
+Ctrl + Shift + E (abre o Explorer do VSCode)
+Navegue até docs/guidelines/chart_development.md
+Clique no arquivo para abrir
+Ctrl + Shift + V (abre o preview do markdown)
+Ou clique no ícone de preview no canto superior direito (tem um ícone que parece uma lupa)
+O preview mostrará o documento formatado, com:
+Títulos hierárquicos
+Blocos de código destacados
+Listas formatadas
+Checklist interativo
+----------------------------------------------------------------------------------
+1. Ranking de Regiões:
+Top 5 estados/países por faturamento
+Gráfico de barras horizontal
+Mostrando o percentual de participação no faturamento total
+
+2.Evolução Temporal:
+Gráfico de linha mostrando a evolução do faturamento
+Separado por Interno vs Exportação
+Agregação mensal dos últimos 12 meses
+
+3. Card de Métricas:
+Total de estados/países atendidos
+Faturamento total (Interno + Exportação)
+Percentual de crescimento vs ano anterior
+Proporção Interno vs Exportação
+
+3. Distribuição por Região:
+Gráfico de pizza ou donut
+Agrupando estados por regiões do Brasil (Norte, Nordeste, etc)
+Incluindo exportações como uma categoria
+
+- Não existe a coluna 'ano' no dataframe. Temos a coluna/serie 'emissao' e será ela que utilizaremos no cálculo de datas, extração de mês, ano, etc.
+- Não existem as colunas 'valor' ou 'faturamento' no dataframe. O nome correto da coluna é 'valorfaturado'
+- O dataframe traz todos os itens da nota. Assim, o id para agrupamento de notas é a coluna 'sequencial'
+
+149,23
+
+74,62
+2x 37,31
+
+
+
